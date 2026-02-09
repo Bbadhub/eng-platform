@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Team memory backups (keep main file tracked)
+.shared/team-memory.json.backup
+.shared/team-memory-*.json
+.shared/*.bak

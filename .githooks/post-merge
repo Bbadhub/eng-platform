@@ -1,0 +1,18 @@
+#!/bin/bash
+# post-merge hook: Runs after 'git pull' or 'git merge'
+# Auto-syncs team memory to local MCP server
+
+TEAM_MEMORY="$(git rev-parse --show-toplevel)/.shared/team-memory.json"
+CHANGED_FILES="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
+
+# Check if team-memory.json was updated
+if echo "$CHANGED_FILES" | grep -q "^\.shared/team-memory.json$"; then
+    echo "🔄 Team memory updated - MCP server will reload on next use"
+
+    # Optional: Notify user
+    if command -v notify-send &> /dev/null; then
+        notify-send "eng-platform" "Team memory synced from upstream"
+    fi
+fi
+
+exit 0

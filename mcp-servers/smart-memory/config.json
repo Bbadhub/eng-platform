@@ -1,0 +1,53 @@
+{
+  "git_repo_mapping": {
+    "github.com/your-org/LegalAI_System": "legalai",
+    "github.com/your-org/AdHub": "adhub",
+    "github.com/your-org/eng-platform": "eng-platform"
+  },
+
+  "classification_rules": {
+    "org_keywords": [
+      "all projects",
+      "team standard",
+      "organization",
+      "company-wide",
+      "engineering process",
+      "code review process",
+      "deployment process",
+      "git workflow",
+      "testing strategy",
+      "security policy",
+      "onboarding",
+      "documentation standard",
+      "ci/cd",
+      "monitoring",
+      "logging strategy",
+      "error handling pattern",
+      "authentication strategy"
+    ],
+
+    "project_keywords": [
+      "this project",
+      "our api",
+      "database schema",
+      "deployment to",
+      "specific to",
+      "codebase",
+      "this app",
+      "feature flag",
+      "environment variable"
+    ]
+  },
+
+  "scope_override_patterns": {
+    "org": [
+      "^Remember for org:",
+      "^Organization standard:",
+      "^Team convention:"
+    ],
+    "project": [
+      "^Remember for this project:",
+      "^Project-specific:"
+    ]
+  }
+}

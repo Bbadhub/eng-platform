@@ -1,0 +1,21 @@
+#!/bin/bash
+# pre-push hook: Runs before 'git push'
+# Ensures team memory is committed if changed
+
+TEAM_MEMORY=".shared/team-memory.json"
+
+# Check if team memory has uncommitted changes
+if git diff --name-only | grep -q "^$TEAM_MEMORY$"; then
+    echo "⚠️  Warning: $TEAM_MEMORY has uncommitted changes"
+    echo "   Memory changes will NOT be synced to team until committed"
+    echo ""
+    echo "   Run: git add $TEAM_MEMORY && git commit -m 'sync: update team memory'"
+    echo ""
+
+    # Optional: Auto-commit (uncomment if you want automatic commits)
+    # git add "$TEAM_MEMORY"
+    # git commit -m "sync: auto-commit team memory changes"
+    # echo "✅ Auto-committed team memory changes"
+fi
+
+exit 0

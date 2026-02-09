@@ -1,0 +1,24 @@
+{
+  "name": "smart-memory-mcp",
+  "version": "1.0.0",
+  "description": "MCP server with automatic project context detection and namespacing",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "smart-memory-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "context",
+    "namespacing"
+  ],
+  "author": "Your Team",
+  "license": "MIT"
+}

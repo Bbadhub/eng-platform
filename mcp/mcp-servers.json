@@ -32,17 +32,17 @@
       "notes": "Automate PR reviews, trigger workflows"
     },
     {
-      "name": "cccmemory",
-      "npm_package": "cccmemory",
-      "github": "https://github.com/xiaolai/cccmemory",
+      "name": "memory",
+      "npm_package": "@modelcontextprotocol/server-memory",
+      "github": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
       "version": "latest",
-      "use_case": "Long-running projects - conversation memory",
-      "tools_count": 6,
+      "use_case": "All projects - knowledge graph memory",
+      "tools_count": 12,
       "overhead": "low",
       "maintenance_status": "active",
-      "stars": "500+",
-      "last_commit": "2026-01",
-      "notes": "Persistent memory across Claude Code sessions"
+      "stars": "Official Anthropic implementation",
+      "last_commit": "2026-02",
+      "notes": "Persistent knowledge graph - replaces history.jsonl, fixes Cursor load issues"
     },
     {
       "name": "filesystem",
