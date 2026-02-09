@@ -1,8 +1,8 @@
 {
   "git_repo_mapping": {
-    "github.com/your-org/LegalAI_System": "legalai",
-    "github.com/your-org/AdHub": "adhub",
-    "github.com/your-org/eng-platform": "eng-platform"
+    "github.com/Bbadhub/LegalAI": "legalai",
+    "github.com/Bbadhub/AdHub": "adhub",
+    "github.com/Bbadhub/eng-platform": "eng-platform"
   },
 
   "classification_rules": {
