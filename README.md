@@ -75,6 +75,19 @@ node scripts/manage-experiments.js checkpoint exp-001-strict-linting
 node scripts/manage-experiments.js complete exp-001-strict-linting
 ```
 
+### Contributing Tools Back (NEW)
+```bash
+# Share tools you've built back to eng-platform
+# See: CONTRIBUTE-TOOL-PROMPT.md for complete workflow
+
+# Quick prompt - Claude handles extraction, cleanup, and PR:
+"I want to contribute [tool-name] to eng-platform"
+
+# Example: Contributing an MCP server
+"I want to contribute the database-validator MCP server.
+It's in mcp-servers/db-validator/ and validates migrations."
+```
+
 ---
 
 ## 📁 Structure
