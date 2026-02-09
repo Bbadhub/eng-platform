@@ -55,6 +55,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - Statistical significance interpretation
    - Best practices and common pitfalls
 
+**LLM Prompt Files (NEW - 2026-02-09):**
+8. **PROMPT-ADD-TO-EXISTING.md** ✅ Validated in production
+   - Simple copy-paste prompt for adding eng-platform to established projects
+   - Analyzes existing setup, preserves configs, safe for production
+   - Validated: Successfully integrated into adhub (established project with 15+ active sprints)
+   - Result: Clean integration, no overwrites, MCP servers added, 992b2a3a committed
+
+9. **PROMPT-CONTRIBUTE-TOOL.md**
+   - Simple copy-paste prompt for contributing tools back to eng-platform
+   - Auto-cleanup of domain-specific code, PR creation
+   - Completes bidirectional workflow: platform ↔ projects
+
+10. **ADD-TO-EXISTING-PROJECT-PROMPT.md**
+    - Detailed guide with explanations, examples, troubleshooting
+    - Reference documentation for the simple prompt
+
+11. **CONTRIBUTE-TOOL-PROMPT.md**
+    - Detailed contribution workflow guide with examples
+    - Reference documentation for the simple prompt
+
 ### Changed
 - README.md updated with tool experimentation features
 - Structure section updated with experiments/ and tools-registry.json
