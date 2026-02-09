@@ -10,7 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Placeholder for upcoming changes
+- **MCP Orchestration Vision** (docs/architecture/mcp-orchestration-vision.md)
+  - Roadmap for eng-platform-mcp (meta MCP server)
+  - Bidirectional sync strategies (npm packages, GitHub Actions, MCP orchestration)
+  - Tool definitions for platform operations (audit, compliance, extract, publish, sync)
+  - Implementation phases: v0.3.0 (MCP server), v0.4.0 (npm configs), v0.5.0 (MCP packages), v1.0.0 (full automation)
+- **Repo #2 Audit Kit** (docs/runbooks/repo2-audit-kit.md)
+  - Enhanced audit for multi-repo consolidation
+  - Comparative audits against LegalAI baseline
+  - ADR generation for conflict resolution
+  - Custom MCP server detection
+  - Merge-aware Phase 4 for v1.0.0
+- **npm Publishing Guide** (docs/runbooks/publish-npm-packages.md)
+  - Restructure configs as npm packages
+  - Automated publishing with GitHub Actions
+  - Dependabot integration for auto-updates
+  - Semantic versioning strategy
+
+### Planned for v0.3.0
+- eng-platform-mcp meta server (Port 9500)
+- AI-orchestrated workflows (audit, compliance, extract, publish)
+- Self-documenting platform operations
 
 ---
 

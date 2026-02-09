@@ -110,6 +110,9 @@ eng-platform/
 - [Migrate to Platform](scripts/migrate-to-platform.sh) - Apply standards
 
 ### Documentation
+- **[MCP Orchestration Vision](docs/architecture/mcp-orchestration-vision.md)** - AI-native platform evolution
+- **[Repo #2 Audit Kit](docs/runbooks/repo2-audit-kit.md)** - Enhanced multi-repo consolidation
+- **[npm Publishing Guide](docs/runbooks/publish-npm-packages.md)** - Package distribution strategy
 - [Processes](docs/processes/) - Code review, protected code, testing
 - [Runbooks](docs/runbooks/) - New project setup, machine setup
 - [Decisions](docs/decisions/) - Architecture Decision Records (ADRs)
@@ -147,7 +150,13 @@ eng-platform/
 - [x] Phase 1-3: Audit LegalAI_System
 - [x] Generate v0.1.0 from LegalAI audit
 - [x] Extract custom MCP servers → v0.2.0
+- [x] Document bidirectional sync strategies
+- [ ] **v0.3.0:** Build eng-platform-mcp (meta MCP server)
+- [ ] **v0.4.0:** Publish configs as npm packages
+- [ ] **v0.5.0:** Publish MCP servers as npm packages
 - [ ] Phase 1-3: Audit Repo #2
+- [ ] **v1.0.0:** Consolidate + ADRs + Full automation
+- [ ] **v2.0.0:** Self-organizing platform + Monorepo
 - [ ] Consolidate findings → v1.0.0
 - [ ] Apply to both repos
 - [ ] Quarterly MCP reviews
