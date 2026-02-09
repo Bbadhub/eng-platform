@@ -1,7 +1,36 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-02-09T00:00:00Z",
-  "entities": {},
-  "relations": [],
-  "observations": []
+  "last_updated": "2026-02-09T09:15:17.608Z",
+  "entities": {
+    "legalai_trpc_routers": {
+      "entityType": "code_location",
+      "observations": [
+        "trpc_router_location"
+      ],
+      "context": "legalai",
+      "createdBy": "Brett",
+      "createdAt": "2026-02-09T09:15:17.606Z"
+    }
+  },
+  "relations": [
+    {
+      "from": "legalai_trpc_routers",
+      "to": "legalai_system",
+      "relationType": "part_of",
+      "context": "legalai",
+      "createdAt": "2026-02-09T09:15:17.608Z"
+    }
+  ],
+  "observations": [
+    {
+      "id": "trpc_router_location",
+      "entityName": "legalai_trpc_routers",
+      "content": "tRPC routers are located in legalai-browser/src/server/routers/ directory. Key routers include: actors.ts (60KB, actor CRUD), validations.ts (triage queue), theories.ts (theory/claim CRUD), counts.ts (criminal counts), snippets.ts (evidence snippets), system.ts (MCP proxy).",
+      "observedAt": "2026-02-09T09:15:17.608Z",
+      "observer": "Brett",
+      "confidence": 1,
+      "scope": "project",
+      "context": "legalai"
+    }
+  ]
 }
