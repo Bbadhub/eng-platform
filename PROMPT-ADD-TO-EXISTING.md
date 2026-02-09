@@ -71,7 +71,8 @@ This is an established project with existing code, so be careful:
 4. Create sprints/ directory if it doesn't exist
 
 5. Initialize shared team memory (for smart-memory MCP server):
-   - Create .shared/ directory if it doesn't exist
+   - Create .shared/ directory at PROJECT ROOT (not in .eng-platform/)
+   - This is YOUR project's team memory (separate from eng-platform's)
    - If .shared/team-memory.json doesn't exist:
      * If .eng-platform/.shared/team-memory-structure-example.json exists, copy it
      * Otherwise create with initial structure:
@@ -90,25 +91,20 @@ This is an established project with existing code, so be careful:
      * Add current project if not already present
      * Keep existing data intact
 
-6. Update smart-memory config for this project:
-   - Get git remote URL for this project (git config --get remote.origin.url)
-   - Add to .eng-platform/mcp-servers/smart-memory/config.json under git_repo_mapping
-   - Format: "github.com/user/repo": "project-name"
+6. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
 
-7. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
-
-8. Create .env.example documenting required environment variables:
+7. Create .env.example documenting required environment variables:
    - VOYAGE_API_KEY (for basin-analyzer semantic embeddings)
    - DEEPSEEK_API_KEY (for basin-analyzer LLM calls)
    - Add note: "Copy to .env and add your actual API keys"
 
-9. Add me to engineer profiles:
+8. Add me to engineer profiles:
    - Get my name and email from git config
    - Add me to .eng-platform/mcp-servers/team-analytics/data/engineer-tool-profiles.json
    - Set tool_stack by detecting what I currently use (ESLint, Prettier, IDE, etc.)
    - Initialize my metrics tracking
 
-10. Install MCP server dependencies:
+9. Install MCP server dependencies:
 
    **Node.js servers:**
    - cd .eng-platform/mcp-servers/beads-integration && npm install
@@ -126,20 +122,24 @@ This is an established project with existing code, so be careful:
 
    Report any installation issues
 
-11. Review changes before committing:
+10. Review changes before committing:
    - Run git status and show all modified/added files
    - Recommend commit message: "chore: integrate eng-platform with MCP servers"
    - List what will be committed
    - Ask: "Ready to commit these changes? (y/n)"
    - Only commit if I confirm yes
 
-12. Show me a summary of:
+11. Show me a summary of:
    - What was added
    - What already existed (and was kept)
    - Which MCP servers were configured (core, database, optional)
+   - MCP Server Status:
+     * Which servers installed successfully
+     * Which servers have dependency issues
+     * Which servers need API keys (basin-analyzer, constraint-validator)
    - Team memory initialization status (.shared/team-memory.json)
    - Any conflicts or issues
-   - Environment variables needed (VOYAGE_API_KEY, DEEPSEEK_API_KEY for basin-analyzer)
+   - Environment variables needed (VOYAGE_API_KEY, DEEPSEEK_API_KEY)
    - Next steps I should take
 
 Do NOT overwrite my existing configs (ESLint, Prettier, TypeScript) unless I explicitly ask you to. Just add the submodule and MCP servers.

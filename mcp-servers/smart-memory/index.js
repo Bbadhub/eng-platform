@@ -86,14 +86,30 @@ function detectProjectContext() {
         return namespace;
       }
     }
+
+    // 2. Auto-derive from git remote URL if not in mapping
+    // github.com/user/MyProject → myproject
+    // github.com/user/my-awesome-app → my-awesome-app
+    const parts = gitRemote.split('/');
+    if (parts.length >= 2) {
+      const repoName = parts[parts.length - 1]
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-') // Sanitize special chars
+        .replace(/-+/g, '-')          // Collapse multiple dashes
+        .replace(/^-|-$/g, '');       // Remove leading/trailing dashes
+
+      if (repoName && repoName !== 'eng-platform') {
+        return repoName;
+      }
+    }
   }
 
-  // 2. Fallback: Check if in eng-platform (special case for org-wide)
+  // 3. Fallback: Check if in eng-platform (special case for org-wide)
   if (cwd.includes('eng-platform') || cwd.includes('engineering-platform')) {
     return 'org';
   }
 
-  // 3. Default to 'org' namespace if no git repo or unknown repo
+  // 4. Default to 'org' namespace if no git repo or unknown repo
   return 'org';
 }
 
