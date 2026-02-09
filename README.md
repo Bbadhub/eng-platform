@@ -44,22 +44,20 @@ echo 'module.exports = require("./eng-platform/configs/eslint/react")' > .eslint
 
 ### For Existing Projects (RECOMMENDED)
 ```bash
-# Use the LLM prompt for established projects with existing configs
-# See: ADD-TO-EXISTING-PROJECT-PROMPT.md
+# ⚡ SIMPLE PROMPT (just copy & paste):
+#    See: PROMPT-ADD-TO-EXISTING.md
+#
+# 📚 DETAILED GUIDE (with explanations):
+#    See: ADD-TO-EXISTING-PROJECT-PROMPT.md
+#
+# 🆕 FOR NEW PROJECTS:
+#    See: ADD-TO-REPO-PROMPT.md
 
-# Copy this into Claude Code:
-"I want to add eng-platform to this existing project.
-
-This is an established project with existing configs, so:
-1. Don't overwrite existing configs without asking
-2. Analyze current setup first
-3. Show me what conflicts and suggest merge strategy
-4. Add eng-platform as git submodule at .eng-platform/
-5. Set up MCP servers for beads and team-analytics
-
-Be careful - this is production code."
-
-# For new/greenfield projects: See ADD-TO-REPO-PROMPT.md
+# The simple prompt will:
+# - Analyze your current setup
+# - Add git submodule at .eng-platform/
+# - Set up MCP servers (beads, team-analytics)
+# - NOT overwrite your configs (safe for production)
 ```
 
 ### Tool Experimentation (NEW)
@@ -79,15 +77,17 @@ node scripts/manage-experiments.js complete exp-001-strict-linting
 
 ### Contributing Tools Back (NEW)
 ```bash
-# Share tools you've built back to eng-platform
-# See: CONTRIBUTE-TOOL-PROMPT.md for complete workflow
+# ⚡ SIMPLE PROMPT (just copy & paste):
+#    See: PROMPT-CONTRIBUTE-TOOL.md
+#
+# 📚 DETAILED GUIDE (with examples):
+#    See: CONTRIBUTE-TOOL-PROMPT.md
 
-# Quick prompt - Claude handles extraction, cleanup, and PR:
-"I want to contribute [tool-name] to eng-platform"
-
-# Example: Contributing an MCP server
-"I want to contribute the database-validator MCP server.
-It's in mcp-servers/db-validator/ and validates migrations."
+# The simple prompt will:
+# - Extract your tool
+# - Remove project-specific code
+# - Add to eng-platform
+# - Create PR for review
 ```
 
 ---
