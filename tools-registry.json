@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-09",
+  "description": "Comprehensive registry of development tools and processes for experimentation and standardization",
+
+  "categories": {
+    "linting": {
+      "description": "Code linting and static analysis tools",
+      "options": [
+        {
+          "id": "eslint-strict",
+          "name": "ESLint Strict",
+          "package": "@your-org/eslint-config-strict",
+          "version": "^1.0.0",
+          "description": "Strict ESLint rules with TypeScript support",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        },
+        {
+          "id": "eslint-base",
+          "name": "ESLint Base",
+          "package": "@your-org/eslint-config-base",
+          "version": "^1.0.0",
+          "description": "Balanced ESLint rules (current standard)",
+          "status": "standard",
+          "introduced": "2026-02-08"
+        },
+        {
+          "id": "biome",
+          "name": "Biome",
+          "package": "@biomejs/biome",
+          "version": "^1.5.0",
+          "description": "Fast alternative to ESLint + Prettier",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "code_quality_score",
+        "pr_approval_rate",
+        "violation_count",
+        "linting_time_ms",
+        "developer_satisfaction"
+      ]
+    },
+
+    "testing": {
+      "description": "Test frameworks and runners",
+      "options": [
+        {
+          "id": "vitest",
+          "name": "Vitest",
+          "package": "vitest",
+          "version": "^1.2.0",
+          "description": "Fast Vite-native test runner (current standard)",
+          "status": "standard",
+          "introduced": "2026-02-08"
+        },
+        {
+          "id": "jest",
+          "name": "Jest",
+          "package": "jest",
+          "version": "^29.0.0",
+          "description": "Mature test framework (legacy)",
+          "status": "deprecated",
+          "introduced": "2025-01-01",
+          "deprecated": "2026-02-08"
+        },
+        {
+          "id": "playwright",
+          "name": "Playwright",
+          "package": "@playwright/test",
+          "version": "^1.41.0",
+          "description": "E2E testing framework",
+          "status": "standard",
+          "introduced": "2026-02-08"
+        }
+      ],
+      "tracked_metrics": [
+        "test_coverage_percent",
+        "test_runtime_ms",
+        "flake_rate",
+        "tests_written_per_week",
+        "developer_satisfaction"
+      ]
+    },
+
+    "git_workflow": {
+      "description": "Git branching and collaboration strategies",
+      "options": [
+        {
+          "id": "trunk-based",
+          "name": "Trunk-Based Development",
+          "package": null,
+          "version": null,
+          "description": "Short-lived branches, frequent integration",
+          "status": "standard",
+          "introduced": "2026-02-08"
+        },
+        {
+          "id": "gitflow",
+          "name": "GitFlow",
+          "package": null,
+          "version": null,
+          "description": "Feature branches with develop/main",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        },
+        {
+          "id": "github-flow",
+          "name": "GitHub Flow",
+          "package": null,
+          "version": null,
+          "description": "Simple feature branches to main",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "deployment_frequency",
+        "lead_time_hours",
+        "merge_conflict_rate",
+        "pr_cycle_time_hours",
+        "developer_satisfaction"
+      ]
+    },
+
+    "ide": {
+      "description": "Integrated Development Environments",
+      "options": [
+        {
+          "id": "vscode",
+          "name": "VS Code",
+          "package": null,
+          "version": null,
+          "description": "Microsoft Visual Studio Code",
+          "status": "standard",
+          "introduced": "2025-01-01"
+        },
+        {
+          "id": "cursor",
+          "name": "Cursor",
+          "package": null,
+          "version": null,
+          "description": "AI-first fork of VS Code",
+          "status": "experimental",
+          "introduced": "2026-01-15"
+        },
+        {
+          "id": "windsurf",
+          "name": "Windsurf",
+          "package": null,
+          "version": null,
+          "description": "Codeium's AI-native IDE",
+          "status": "experimental",
+          "introduced": "2026-02-01"
+        }
+      ],
+      "tracked_metrics": [
+        "code_quality_score",
+        "velocity_commits_per_week",
+        "ai_suggestion_acceptance_rate",
+        "developer_satisfaction"
+      ]
+    },
+
+    "commit_style": {
+      "description": "Commit message conventions",
+      "options": [
+        {
+          "id": "conventional-commits",
+          "name": "Conventional Commits",
+          "package": "@commitlint/config-conventional",
+          "version": "^18.0.0",
+          "description": "feat/fix/chore conventions (current standard)",
+          "status": "standard",
+          "introduced": "2026-02-08"
+        },
+        {
+          "id": "gitmoji",
+          "name": "Gitmoji",
+          "package": "gitmoji-cli",
+          "version": "^9.0.0",
+          "description": "Emoji-based commit messages",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "commit_message_quality_score",
+        "changelog_generation_success_rate",
+        "developer_satisfaction"
+      ]
+    },
+
+    "code_review": {
+      "description": "Code review tools and processes",
+      "options": [
+        {
+          "id": "github-pr",
+          "name": "GitHub Pull Requests",
+          "package": null,
+          "version": null,
+          "description": "Standard GitHub PR review",
+          "status": "standard",
+          "introduced": "2025-01-01"
+        },
+        {
+          "id": "pr-agent",
+          "name": "PR-Agent",
+          "package": null,
+          "version": null,
+          "description": "AI-powered PR analysis and suggestions",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "pr_approval_rate",
+        "pr_cycle_time_hours",
+        "review_comment_count",
+        "bug_escape_rate",
+        "developer_satisfaction"
+      ]
+    },
+
+    "ai_assistant": {
+      "description": "AI coding assistants",
+      "options": [
+        {
+          "id": "claude-code",
+          "name": "Claude Code",
+          "package": null,
+          "version": null,
+          "description": "Anthropic Claude for coding",
+          "status": "standard",
+          "introduced": "2026-01-01"
+        },
+        {
+          "id": "github-copilot",
+          "name": "GitHub Copilot",
+          "package": null,
+          "version": null,
+          "description": "GitHub's AI pair programmer",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        },
+        {
+          "id": "codeium",
+          "name": "Codeium",
+          "package": null,
+          "version": null,
+          "description": "Free AI code completion",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "velocity_commits_per_week",
+        "code_quality_score",
+        "ai_suggestion_acceptance_rate",
+        "bug_rate",
+        "developer_satisfaction"
+      ]
+    },
+
+    "task_management": {
+      "description": "Issue tracking and task management for AI workflows",
+      "options": [
+        {
+          "id": "beads",
+          "name": "Beads",
+          "package": "beads",
+          "version": "latest",
+          "description": "AI-optimized issue tracker - JSONL storage, hash-based IDs, agent-friendly JSON output",
+          "status": "experimental",
+          "introduced": "2026-02-09",
+          "repo": "https://github.com/steveyegge/beads"
+        },
+        {
+          "id": "github-issues",
+          "name": "GitHub Issues",
+          "package": null,
+          "version": null,
+          "description": "Standard GitHub issue tracking",
+          "status": "standard",
+          "introduced": "2025-01-01"
+        },
+        {
+          "id": "linear",
+          "name": "Linear",
+          "package": null,
+          "version": null,
+          "description": "Modern issue tracking and project management",
+          "status": "experimental",
+          "introduced": "2026-02-09"
+        }
+      ],
+      "tracked_metrics": [
+        "velocity_commits_per_week",
+        "task_completion_rate",
+        "task_cycle_time_hours",
+        "developer_satisfaction"
+      ]
+    }
+  },
+
+  "tool_statuses": {
+    "standard": "Recommended for all projects (proven effective)",
+    "experimental": "Available for testing (data collection phase)",
+    "deprecated": "Being phased out (migrate away)",
+    "proposed": "Under evaluation (not yet available)"
+  },
+
+  "metric_definitions": {
+    "code_quality_score": {
+      "type": "numeric",
+      "range": [0, 100],
+      "source": "team-analytics MCP",
+      "description": "Overall code quality score from git analysis"
+    },
+    "velocity_commits_per_week": {
+      "type": "numeric",
+      "range": [0, null],
+      "source": "team-analytics MCP",
+      "description": "Average commits per week per engineer"
+    },
+    "pr_approval_rate": {
+      "type": "numeric",
+      "range": [0, 1],
+      "source": "GitHub API",
+      "description": "Percentage of PRs approved on first review"
+    },
+    "bug_rate": {
+      "type": "numeric",
+      "range": [0, 1],
+      "source": "git history",
+      "description": "Percentage of commits that are bug fixes"
+    },
+    "test_coverage_percent": {
+      "type": "numeric",
+      "range": [0, 100],
+      "source": "CI/CD coverage reports",
+      "description": "Percentage of code covered by tests"
+    },
+    "developer_satisfaction": {
+      "type": "numeric",
+      "range": [1, 5],
+      "source": "weekly surveys",
+      "description": "Developer satisfaction rating (1-5 scale)"
+    },
+    "deployment_frequency": {
+      "type": "numeric",
+      "range": [0, null],
+      "source": "DORA metrics",
+      "description": "Deployments per week (DORA metric)"
+    },
+    "lead_time_hours": {
+      "type": "numeric",
+      "range": [0, null],
+      "source": "DORA metrics",
+      "description": "Hours from commit to production (DORA metric)"
+    }
+  },
+
+  "promotion_criteria": {
+    "description": "Criteria for promoting experimental tools to standard",
+    "requirements": {
+      "min_users": 5,
+      "min_duration_weeks": 8,
+      "min_improvement_percent": 10,
+      "max_p_value": 0.05,
+      "min_satisfaction_score": 4.0,
+      "min_adoption_willingness_percent": 75
+    }
+  },
+
+  "deprecation_policy": {
+    "description": "Policy for deprecating tools",
+    "grace_period_weeks": 12,
+    "migration_support": true,
+    "automated_migration": "preferred"
+  }
+}

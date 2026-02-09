@@ -9,10 +9,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Tool Experimentation & Analytics (v1.1.0)
+
+**Tool Tracking Infrastructure:**
+1. **tools-registry.json** - Comprehensive tool catalog
+   - 7 categories: linting, testing, git_workflow, ide, commit_style, code_review, ai_assistant
+   - Tool options with status tracking (standard, experimental, deprecated)
+   - Metric definitions for each category
+   - Promotion criteria for standardization
+
+2. **Experiment Framework** (experiments/)
+   - A/B testing system for controlled tool experiments
+   - Experiment schema with treatment/control cohorts
+   - Weekly checkpoint tracking
+   - Statistical significance calculations
+   - Success criteria definitions
+
+3. **Tool Tracking Schema** (mcp-servers/team-analytics/schemas/)
+   - Engineer tool profiles (who uses what)
+   - Tool history tracking (before/after metrics)
+   - Experiment participation tracking
+   - Satisfaction score collection
+
+4. **Experiment Management Script** (scripts/manage-experiments.js)
+   - CLI for starting, checkpointing, and completing experiments
+   - Automated result analysis
+   - Report generation
+
+**Bidirectional Sync Infrastructure:**
+5. **Root package.json**
+   - npm workspace setup for publishing configs as packages
+   - Scripts for publishing to npm registry
+   - Future: Automated dependency updates via Dependabot
+
+6. **Apply to Project Guide** (docs/runbooks/apply-to-existing-project.md)
+   - 3 sync strategies (git submodule, copy files, npm packages)
+   - Decision tree: what to install vs not install
+   - Automated sync workflows
+   - Troubleshooting guide
+
+**Documentation:**
+7. **Tool Experimentation Guide** (docs/runbooks/tool-experimentation-guide.md)
+   - Complete workflow for running A/B tests
+   - Experiment templates (linting, IDE, git workflow)
+   - Statistical significance interpretation
+   - Best practices and common pitfalls
+
+### Changed
+- README.md updated with tool experimentation features
+- Structure section updated with experiments/ and tools-registry.json
+- Quick Start section includes experiment management examples
+
 ### Planned for v0.3.0
 - eng-platform-mcp meta server (Port 9500)
 - AI-orchestrated workflows (audit, compliance, extract, publish)
 - Self-documenting platform operations
+- Publish configs as npm packages
+- Automated PR creation for standards updates
 
 ---
 

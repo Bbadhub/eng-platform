@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool Experiment Schema",
+  "description": "Schema for A/B testing development tools",
+  "type": "object",
+
+  "definitions": {
+    "experiment": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "status",
+        "start_date",
+        "duration_weeks",
+        "hypothesis",
+        "category",
+        "cohorts",
+        "metrics_to_track",
+        "success_criteria"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^exp-[0-9]{3}-[a-z-]+$",
+          "description": "Unique experiment ID (e.g., exp-001-strict-linting)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable experiment name"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "active", "paused", "completed", "abandoned"],
+          "description": "Current experiment status"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Experiment start date (YYYY-MM-DD)"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Planned or actual end date"
+        },
+        "duration_weeks": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 12,
+          "description": "Experiment duration in weeks (2-12)"
+        },
+        "hypothesis": {
+          "type": "string",
+          "description": "What we expect to observe (falsifiable prediction)"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["linting", "testing", "git_workflow", "ide", "commit_style", "code_review", "ai_assistant"],
+          "description": "Tool category being tested"
+        },
+        "cohorts": {
+          "type": "object",
+          "required": ["treatment", "control"],
+          "properties": {
+            "treatment": {
+              "$ref": "#/definitions/cohort",
+              "description": "Group using new/experimental tool"
+            },
+            "control": {
+              "$ref": "#/definitions/cohort",
+              "description": "Group using baseline/standard tool"
+            }
+          }
+        },
+        "metrics_to_track": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "code_quality_score",
+              "velocity_commits_per_week",
+              "pr_approval_rate",
+              "bug_rate",
+              "test_coverage_percent",
+              "test_runtime_ms",
+              "deployment_frequency",
+              "lead_time_hours",
+              "merge_conflict_rate",
+              "developer_satisfaction",
+              "ai_suggestion_acceptance_rate"
+            ]
+          },
+          "description": "Metrics to measure during experiment"
+        },
+        "success_criteria": {
+          "type": "object",
+          "description": "Thresholds for declaring experiment successful",
+          "properties": {
+            "min_improvement_percent": {
+              "type": "number",
+              "description": "Minimum improvement required (e.g., 10 = 10%)"
+            },
+            "max_velocity_loss_percent": {
+              "type": "number",
+              "description": "Maximum acceptable velocity loss (e.g., 5 = -5%)"
+            },
+            "min_satisfaction_score": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5,
+              "description": "Minimum developer satisfaction (1-5 scale)"
+            },
+            "max_p_value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.1,
+              "description": "Maximum p-value for statistical significance (typically 0.05)"
+            }
+          }
+        },
+        "weekly_checkpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/checkpoint"
+          },
+          "description": "Weekly progress snapshots"
+        },
+        "results": {
+          "$ref": "#/definitions/results",
+          "description": "Final experiment results (completed experiments only)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional context, lessons learned, or observations"
+        }
+      }
+    },
+
+    "cohort": {
+      "type": "object",
+      "required": ["tool_id"],
+      "properties": {
+        "tool_id": {
+          "type": "string",
+          "description": "Tool identifier from tools-registry.json"
+        },
+        "engineers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Engineers assigned to this cohort"
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Projects using this tool"
+        }
+      }
+    },
+
+    "checkpoint": {
+      "type": "object",
+      "required": ["week", "date", "treatment_metrics", "control_metrics"],
+      "properties": {
+        "week": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Week number (1-indexed)"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Checkpoint date"
+        },
+        "treatment_metrics": {
+          "$ref": "#/definitions/metric_snapshot",
+          "description": "Metrics for treatment cohort"
+        },
+        "control_metrics": {
+          "$ref": "#/definitions/metric_snapshot",
+          "description": "Metrics for control cohort"
+        },
+        "delta": {
+          "type": "object",
+          "description": "Treatment vs Control difference",
+          "patternProperties": {
+            "^[a-z_]+$": {
+              "type": "number",
+              "description": "Percentage difference"
+            }
+          }
+        },
+        "observations": {
+          "type": "string",
+          "description": "Qualitative observations this week"
+        }
+      }
+    },
+
+    "metric_snapshot": {
+      "type": "object",
+      "properties": {
+        "code_quality_score": {"type": "number"},
+        "velocity_commits_per_week": {"type": "number"},
+        "pr_approval_rate": {"type": "number"},
+        "bug_rate": {"type": "number"},
+        "test_coverage_percent": {"type": "number"},
+        "developer_satisfaction": {"type": "number"},
+        "sample_size": {"type": "integer"}
+      }
+    },
+
+    "results": {
+      "type": "object",
+      "required": ["conclusion", "winner", "statistical_significance"],
+      "properties": {
+        "conclusion": {
+          "type": "string",
+          "enum": ["treatment_wins", "control_wins", "no_difference", "inconclusive"],
+          "description": "Experiment outcome"
+        },
+        "winner": {
+          "type": "string",
+          "description": "Tool ID of winning tool (or null if no winner)"
+        },
+        "statistical_significance": {
+          "type": "object",
+          "properties": {
+            "p_value": {
+              "type": "number",
+              "description": "Statistical significance (< 0.05 = significant)"
+            },
+            "confidence_level": {
+              "type": "number",
+              "description": "Confidence level (0-1, typically 0.95)"
+            },
+            "effect_size": {
+              "type": "number",
+              "description": "Cohen's d or similar effect size metric"
+            }
+          }
+        },
+        "improvement_percent": {
+          "type": "number",
+          "description": "Percentage improvement of winner vs baseline"
+        },
+        "meets_success_criteria": {
+          "type": "boolean",
+          "description": "Whether success criteria were met"
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "promote_to_standard",
+            "extend_experiment",
+            "keep_as_option",
+            "deprecate_treatment",
+            "no_action"
+          ],
+          "description": "Recommended action based on results"
+        },
+        "next_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Concrete next steps based on results"
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "version": {"type": "string"},
+    "description": {"type": "string"},
+    "active_experiments": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/experiment"}
+    },
+    "completed_experiments": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/experiment"}
+    }
+  }
+}

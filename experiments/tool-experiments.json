@@ -1,0 +1,74 @@
+{
+  "$schema": "./experiment-schema.json",
+  "version": "1.0.0",
+  "description": "Tool experimentation tracking for data-driven standardization",
+  "active_experiments": [
+    {
+      "id": "exp-001-strict-linting",
+      "name": "Strict ESLint vs Base ESLint",
+      "status": "active",
+      "start_date": "2026-02-15",
+      "end_date": "2026-03-15",
+      "duration_weeks": 4,
+      "hypothesis": "Stricter linting rules improve code quality by 10% with minimal velocity impact",
+      "category": "linting",
+      "cohorts": {
+        "treatment": {
+          "tool_id": "eslint-strict",
+          "engineers": [],
+          "projects": []
+        },
+        "control": {
+          "tool_id": "eslint-base",
+          "engineers": [],
+          "projects": []
+        }
+      },
+      "metrics_to_track": [
+        "code_quality_score",
+        "velocity_commits_per_week",
+        "pr_approval_rate",
+        "bug_rate",
+        "developer_satisfaction"
+      ],
+      "success_criteria": {
+        "min_improvement_percent": 10,
+        "max_velocity_loss_percent": 5,
+        "min_satisfaction_score": 4.0,
+        "max_p_value": 0.05
+      },
+      "weekly_checkpoints": []
+    }
+  ],
+  "completed_experiments": [],
+  "templates": {
+    "new_experiment": {
+      "id": "exp-XXX-description",
+      "name": "Human-readable name",
+      "status": "planned",
+      "start_date": "YYYY-MM-DD",
+      "end_date": "YYYY-MM-DD",
+      "duration_weeks": 4,
+      "hypothesis": "What we expect to observe",
+      "category": "linting|testing|git_workflow|ide|etc",
+      "cohorts": {
+        "treatment": {
+          "tool_id": "new-tool",
+          "engineers": ["Alice", "Bob"],
+          "projects": ["project-a", "project-b"]
+        },
+        "control": {
+          "tool_id": "baseline-tool",
+          "engineers": ["Charlie", "David"],
+          "projects": ["project-c", "project-d"]
+        }
+      },
+      "metrics_to_track": [
+        "Primary metrics to measure"
+      ],
+      "success_criteria": {
+        "Define what success looks like"
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "beads-integration-mcp",
+  "version": "1.0.0",
+  "description": "Beads MCP Server for subtask management in multi-agent workflows",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "beads-mcp": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": [
+    "mcp",
+    "beads",
+    "task-management",
+    "multi-agent",
+    "subtasks"
+  ],
+  "author": "eng-platform",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "beads": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bbadhub/eng-platform.git",
+    "directory": "mcp-servers/beads-integration"
+  }
+}

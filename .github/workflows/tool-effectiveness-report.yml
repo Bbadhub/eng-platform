@@ -1,0 +1,45 @@
+name: Weekly Tool Effectiveness Report
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate tool effectiveness report
+        run: |
+          node scripts/analyze-tool-effectiveness.js all --format markdown --output tool-effectiveness-report.md
+
+      - name: Create GitHub Issue with Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('tool-effectiveness-report.md', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 Weekly Tool Effectiveness Report - ${new Date().toISOString().split('T')[0]}`,
+              body: report,
+              labels: ['analytics', 'automated-report']
+            });
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tool-effectiveness-report
+          path: tool-effectiveness-report.md
+          retention-days: 90

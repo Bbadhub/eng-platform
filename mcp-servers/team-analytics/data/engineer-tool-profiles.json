@@ -1,0 +1,266 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-02-09T12:00:00Z",
+  "engineers": [
+    {
+      "engineer_name": "Brett",
+      "engineer_email": "brett@example.com",
+      "tool_stack": {
+        "linting": "eslint-base",
+        "testing": "vitest",
+        "git_workflow": "trunk-based",
+        "ide": "cursor",
+        "commit_style": "conventional-commits",
+        "code_review": "github-pr",
+        "ai_assistant": "claude-code",
+        "task_management": "beads"
+      },
+      "tool_history": [
+        {
+          "tool_id": "cursor",
+          "category": "ide",
+          "started_at": "2026-01-15",
+          "ended_at": null,
+          "reason": "personal_preference",
+          "metrics_before": {
+            "code_quality_score": 92,
+            "velocity_commits_per_week": 14,
+            "pr_approval_rate": 0.95,
+            "bug_rate": 0.06
+          },
+          "metrics_after": {
+            "code_quality_score": 96,
+            "velocity_commits_per_week": 18,
+            "pr_approval_rate": 0.98,
+            "bug_rate": 0.04
+          },
+          "satisfaction_score": 5.0,
+          "notes": "AI suggestions are incredible. Cursor's composer mode is a game-changer for refactoring."
+        },
+        {
+          "tool_id": "vitest",
+          "category": "testing",
+          "started_at": "2025-11-01",
+          "ended_at": null,
+          "reason": "team_standard",
+          "metrics_before": {
+            "code_quality_score": 88,
+            "test_coverage_percent": 75
+          },
+          "metrics_after": {
+            "code_quality_score": 92,
+            "test_coverage_percent": 85
+          },
+          "satisfaction_score": 4.5,
+          "notes": "Much faster than Jest. Watch mode is excellent."
+        }
+      ],
+      "experiment_participation": [],
+      "last_updated": "2026-02-09T12:00:00Z"
+    },
+    {
+      "engineer_name": "Alice Thompson",
+      "engineer_email": "alice@example.com",
+      "tool_stack": {
+        "linting": "eslint-strict",
+        "testing": "vitest",
+        "git_workflow": "trunk-based",
+        "ide": "vscode",
+        "commit_style": "conventional-commits",
+        "code_review": "github-pr",
+        "ai_assistant": "github-copilot"
+      },
+      "tool_history": [
+        {
+          "tool_id": "eslint-strict",
+          "category": "linting",
+          "started_at": "2026-01-15",
+          "ended_at": null,
+          "reason": "experiment",
+          "metrics_before": {
+            "code_quality_score": 72,
+            "velocity_commits_per_week": 11,
+            "pr_approval_rate": 0.78,
+            "bug_rate": 0.18
+          },
+          "metrics_after": {
+            "code_quality_score": 85,
+            "velocity_commits_per_week": 12,
+            "pr_approval_rate": 0.92,
+            "bug_rate": 0.08
+          },
+          "satisfaction_score": 4.5,
+          "notes": "Stricter rules caught bugs earlier. Small learning curve but worth it."
+        }
+      ],
+      "experiment_participation": [
+        {
+          "experiment_id": "exp-001-strict-linting",
+          "cohort": "treatment",
+          "status": "active",
+          "weekly_feedback": [
+            {
+              "week": 1,
+              "satisfaction": 3.0,
+              "challenges": "Too many errors at first",
+              "wins": "Caught 3 potential bugs"
+            },
+            {
+              "week": 2,
+              "satisfaction": 4.0,
+              "challenges": "Still learning some rules",
+              "wins": "PRs getting approved faster"
+            }
+          ]
+        }
+      ],
+      "last_updated": "2026-02-09T11:30:00Z"
+    },
+    {
+      "engineer_name": "Bob Martinez",
+      "engineer_email": "bob@example.com",
+      "tool_stack": {
+        "linting": "eslint-strict",
+        "testing": "vitest",
+        "git_workflow": "gitflow",
+        "ide": "windsurf",
+        "commit_style": "conventional-commits",
+        "code_review": "github-pr",
+        "ai_assistant": "codeium"
+      },
+      "tool_history": [
+        {
+          "tool_id": "windsurf",
+          "category": "ide",
+          "started_at": "2026-02-01",
+          "ended_at": null,
+          "reason": "experiment",
+          "metrics_before": {
+            "code_quality_score": 78,
+            "velocity_commits_per_week": 10
+          },
+          "metrics_after": {
+            "code_quality_score": 82,
+            "velocity_commits_per_week": 13
+          },
+          "satisfaction_score": 4.8,
+          "notes": "Cascade is amazing. Multi-file editing is a killer feature."
+        },
+        {
+          "tool_id": "eslint-strict",
+          "category": "linting",
+          "started_at": "2026-01-15",
+          "ended_at": null,
+          "reason": "experiment",
+          "metrics_before": {
+            "code_quality_score": 75,
+            "pr_approval_rate": 0.80
+          },
+          "metrics_after": {
+            "code_quality_score": 82,
+            "pr_approval_rate": 0.88
+          },
+          "satisfaction_score": 4.0,
+          "notes": "Good rules, but a bit strict for rapid prototyping."
+        }
+      ],
+      "experiment_participation": [
+        {
+          "experiment_id": "exp-001-strict-linting",
+          "cohort": "treatment",
+          "status": "active",
+          "weekly_feedback": [
+            {
+              "week": 1,
+              "satisfaction": 3.5,
+              "challenges": "Slowed me down initially",
+              "wins": "Cleaner code"
+            }
+          ]
+        }
+      ],
+      "last_updated": "2026-02-09T10:45:00Z"
+    },
+    {
+      "engineer_name": "Charlie Lee",
+      "engineer_email": "charlie@example.com",
+      "tool_stack": {
+        "linting": "eslint-base",
+        "testing": "vitest",
+        "git_workflow": "trunk-based",
+        "ide": "vscode",
+        "commit_style": "conventional-commits",
+        "code_review": "github-pr",
+        "ai_assistant": "claude-code"
+      },
+      "tool_history": [
+        {
+          "tool_id": "eslint-base",
+          "category": "linting",
+          "started_at": "2025-06-01",
+          "ended_at": null,
+          "reason": "team_standard",
+          "metrics_before": {
+            "code_quality_score": 70
+          },
+          "metrics_after": {
+            "code_quality_score": 78
+          },
+          "satisfaction_score": 4.0,
+          "notes": "Standard config works well for most cases."
+        }
+      ],
+      "experiment_participation": [
+        {
+          "experiment_id": "exp-001-strict-linting",
+          "cohort": "control",
+          "status": "active",
+          "weekly_feedback": []
+        }
+      ],
+      "last_updated": "2026-02-09T09:15:00Z"
+    },
+    {
+      "engineer_name": "David Kim",
+      "engineer_email": "david@example.com",
+      "tool_stack": {
+        "linting": "eslint-base",
+        "testing": "playwright",
+        "git_workflow": "github-flow",
+        "ide": "vscode",
+        "commit_style": "conventional-commits",
+        "code_review": "pr-agent",
+        "ai_assistant": "github-copilot"
+      },
+      "tool_history": [
+        {
+          "tool_id": "pr-agent",
+          "category": "code_review",
+          "started_at": "2026-01-20",
+          "ended_at": null,
+          "reason": "experiment",
+          "metrics_before": {
+            "pr_approval_rate": 0.82,
+            "pr_cycle_time_hours": 48
+          },
+          "metrics_after": {
+            "pr_approval_rate": 0.89,
+            "pr_cycle_time_hours": 36
+          },
+          "satisfaction_score": 4.5,
+          "notes": "AI reviews catch things humans miss. Speeds up the review cycle."
+        }
+      ],
+      "experiment_participation": [
+        {
+          "experiment_id": "exp-001-strict-linting",
+          "cohort": "control",
+          "status": "active",
+          "weekly_feedback": []
+        }
+      ],
+      "last_updated": "2026-02-09T08:30:00Z"
+    }
+  ],
+  "notes": "Sample data for tool tracking demonstration. In production, this would be populated from actual git history and surveys."
+}

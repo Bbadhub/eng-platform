@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command Usage Tracking Schema",
+  "description": "Track engineer command patterns to suggest useful shortcuts",
+  "version": "1.0.0",
+
+  "command_usage": {
+    "type": "object",
+    "properties": {
+      "engineer_name": {
+        "type": "string",
+        "description": "Engineer's name"
+      },
+      "date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date of tracking"
+      },
+      "commands": {
+        "type": "array",
+        "description": "Commands used this day",
+        "items": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "Command or prompt used"
+            },
+            "category": {
+              "type": "string",
+              "enum": ["sprint", "task", "tool", "experiment", "health", "setup", "mcp", "git", "other"],
+              "description": "Command category"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "time_taken_seconds": {
+              "type": "number",
+              "description": "How long it took to execute"
+            },
+            "success": {
+              "type": "boolean",
+              "description": "Did it work?"
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "usage_analytics": {
+    "type": "object",
+    "description": "Aggregated usage patterns",
+    "properties": {
+      "timeframe_days": {
+        "type": "integer",
+        "description": "Analysis period (e.g., 7 days)"
+      },
+      "top_commands": {
+        "type": "array",
+        "description": "Most frequently used commands",
+        "items": {
+          "type": "object",
+          "properties": {
+            "command_pattern": {
+              "type": "string",
+              "description": "Normalized command pattern"
+            },
+            "frequency": {
+              "type": "integer",
+              "description": "Times used"
+            },
+            "avg_time_seconds": {
+              "type": "number",
+              "description": "Average execution time"
+            },
+            "engineers_using": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Engineers who use this"
+            },
+            "suggested_shortcut": {
+              "type": "string",
+              "description": "Proposed shortcut command"
+            },
+            "estimated_time_saved": {
+              "type": "number",
+              "description": "Seconds saved per use with shortcut"
+            }
+          }
+        }
+      },
+      "categories_breakdown": {
+        "type": "object",
+        "description": "Usage by category"
+      }
+    }
+  },
+
+  "shortcut_recommendations": {
+    "type": "array",
+    "description": "Auto-generated shortcut suggestions",
+    "items": {
+      "type": "object",
+      "properties": {
+        "shortcut": {
+          "type": "string",
+          "description": "Proposed shortcut (e.g., /ready)"
+        },
+        "replaces": {
+          "type": "string",
+          "description": "Long command it replaces"
+        },
+        "usage_count": {
+          "type": "integer",
+          "description": "Times the long command was used"
+        },
+        "time_saved_per_use": {
+          "type": "number",
+          "description": "Seconds saved"
+        },
+        "total_time_saved_per_week": {
+          "type": "number",
+          "description": "Total seconds saved per week"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Implementation priority"
+        },
+        "justification": {
+          "type": "string",
+          "description": "Why this shortcut is recommended"
+        }
+      }
+    }
+  },
+
+  "example_usage_log": {
+    "engineer_name": "Brett",
+    "date": "2026-02-09",
+    "commands": [
+      {
+        "command": "node scripts/analyze-tool-effectiveness.js linting",
+        "category": "tool",
+        "timestamp": "2026-02-09T09:15:00Z",
+        "time_taken_seconds": 3.2,
+        "success": true
+      },
+      {
+        "command": "bd list --status ready --assignee agent-api",
+        "category": "task",
+        "timestamp": "2026-02-09T09:30:00Z",
+        "time_taken_seconds": 1.5,
+        "success": true
+      },
+      {
+        "command": "node scripts/orchestrate-sprint.js status sprint-19",
+        "category": "sprint",
+        "timestamp": "2026-02-09T10:00:00Z",
+        "time_taken_seconds": 2.8,
+        "success": true
+      },
+      {
+        "command": "bd list --status ready --assignee agent-api",
+        "category": "task",
+        "timestamp": "2026-02-09T11:30:00Z",
+        "time_taken_seconds": 1.4,
+        "success": true
+      },
+      {
+        "command": "node scripts/analyze-tool-effectiveness.js ide",
+        "category": "tool",
+        "timestamp": "2026-02-09T14:00:00Z",
+        "time_taken_seconds": 3.5,
+        "success": true
+      },
+      {
+        "command": "bd list --status ready --assignee agent-api",
+        "category": "task",
+        "timestamp": "2026-02-09T15:45:00Z",
+        "time_taken_seconds": 1.6,
+        "success": true
+      }
+    ]
+  },
+
+  "example_analytics": {
+    "timeframe_days": 7,
+    "top_commands": [
+      {
+        "command_pattern": "bd list --status ready --assignee *",
+        "frequency": 24,
+        "avg_time_seconds": 1.5,
+        "engineers_using": ["Brett", "Alice", "Bob"],
+        "suggested_shortcut": "/ready [agent]",
+        "estimated_time_saved": 5.0
+      },
+      {
+        "command_pattern": "node scripts/analyze-tool-effectiveness.js *",
+        "frequency": 12,
+        "avg_time_seconds": 3.2,
+        "engineers_using": ["Brett"],
+        "suggested_shortcut": "/tools [category]",
+        "estimated_time_saved": 8.0
+      },
+      {
+        "command_pattern": "node scripts/orchestrate-sprint.js status *",
+        "frequency": 18,
+        "avg_time_seconds": 2.8,
+        "engineers_using": ["Brett", "Alice"],
+        "suggested_shortcut": "/sprint status",
+        "estimated_time_saved": 6.5
+      },
+      {
+        "command_pattern": "bd show * --json",
+        "frequency": 15,
+        "avg_time_seconds": 1.8,
+        "engineers_using": ["Brett", "Bob"],
+        "suggested_shortcut": "/task [id]",
+        "estimated_time_saved": 4.0
+      }
+    ],
+    "categories_breakdown": {
+      "task": 35,
+      "sprint": 20,
+      "tool": 15,
+      "experiment": 8,
+      "health": 5,
+      "setup": 3
+    }
+  },
+
+  "example_recommendations": [
+    {
+      "shortcut": "/ready",
+      "replaces": "bd list --status ready --assignee agent-api",
+      "usage_count": 24,
+      "time_saved_per_use": 5.0,
+      "total_time_saved_per_week": 120,
+      "priority": "high",
+      "justification": "Used 24 times in 7 days by 3 engineers. Saves 2 minutes/week per engineer."
+    },
+    {
+      "shortcut": "/sprint status",
+      "replaces": "node scripts/orchestrate-sprint.js status sprint-19",
+      "usage_count": 18,
+      "time_saved_per_use": 6.5,
+      "priority": "high",
+      "justification": "Used 18 times in 7 days by 2 engineers. Saves 1.95 minutes/week."
+    },
+    {
+      "shortcut": "/tools",
+      "replaces": "node scripts/analyze-tool-effectiveness.js [category]",
+      "usage_count": 12,
+      "time_saved_per_use": 8.0,
+      "priority": "medium",
+      "justification": "Used 12 times in 7 days by 1 engineer. Saves 1.6 minutes/week."
+    }
+  ]
+}

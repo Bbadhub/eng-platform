@@ -1,0 +1,49 @@
+{
+  "name": "@your-org/eng-platform",
+  "version": "1.0.0",
+  "description": "Unified engineering standards, tools, and templates for all projects",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bbadhub/eng-platform.git"
+  },
+  "keywords": [
+    "engineering-standards",
+    "tooling",
+    "configs",
+    "mcp-servers",
+    "team-analytics"
+  ],
+  "author": "Your Organization",
+  "license": "MIT",
+  "private": false,
+  "workspaces": [
+    "configs/eslint",
+    "configs/prettier",
+    "configs/typescript",
+    "configs/commitlint",
+    "configs/husky",
+    "configs/playwright-reporters",
+    "mcp-servers/*"
+  ],
+  "scripts": {
+    "install-all": "npm install && npm run install-mcp-servers",
+    "install-mcp-servers": "for dir in mcp-servers/*/; do (cd \"$dir\" && npm install); done",
+    "test": "echo 'No tests yet' && exit 0",
+    "lint": "echo 'Add linting later'",
+    "check-compliance": "bash scripts/check-compliance.sh",
+    "team-sync-check": "node scripts/team-sync-check.js",
+    "team-health": "echo 'Run: node mcp-servers/team-analytics/server.js'",
+    "publish-configs": "npm run publish-eslint && npm run publish-prettier && npm run publish-typescript",
+    "publish-eslint": "cd configs/eslint && npm publish --access public",
+    "publish-prettier": "cd configs/prettier && npm publish --access public",
+    "publish-typescript": "cd configs/typescript && npm publish --access public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

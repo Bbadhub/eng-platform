@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool Tracking Schema Extension",
+  "description": "Extends team-memory.json to track engineer tool preferences and effectiveness",
+  "version": "1.0.0",
+
+  "engineer_tool_profile": {
+    "type": "object",
+    "properties": {
+      "engineer_name": {
+        "type": "string",
+        "description": "Engineer's full name"
+      },
+      "engineer_email": {
+        "type": "string",
+        "format": "email"
+      },
+      "tool_stack": {
+        "type": "object",
+        "description": "Current tool choices by category",
+        "properties": {
+          "linting": {
+            "type": "string",
+            "enum": ["eslint-strict", "eslint-base", "biome"],
+            "description": "Current linting tool"
+          },
+          "testing": {
+            "type": "string",
+            "enum": ["vitest", "jest", "playwright"],
+            "description": "Primary test framework"
+          },
+          "git_workflow": {
+            "type": "string",
+            "enum": ["trunk-based", "gitflow", "github-flow"],
+            "description": "Git branching strategy"
+          },
+          "ide": {
+            "type": "string",
+            "enum": ["vscode", "cursor", "windsurf"],
+            "description": "Primary IDE"
+          },
+          "commit_style": {
+            "type": "string",
+            "enum": ["conventional-commits", "gitmoji"],
+            "description": "Commit message convention"
+          },
+          "code_review": {
+            "type": "string",
+            "enum": ["github-pr", "pr-agent"],
+            "description": "Code review tool"
+          },
+          "ai_assistant": {
+            "type": "string",
+            "enum": ["claude-code", "github-copilot", "codeium"],
+            "description": "AI coding assistant"
+          }
+        },
+        "required": ["linting", "testing", "git_workflow", "ide"]
+      },
+      "tool_history": {
+        "type": "array",
+        "description": "Historical tool changes and their impact",
+        "items": {
+          "type": "object",
+          "properties": {
+            "tool_id": {
+              "type": "string",
+              "description": "Tool identifier from tools-registry.json"
+            },
+            "category": {
+              "type": "string",
+              "description": "Tool category (linting, testing, etc.)"
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date",
+              "description": "When engineer started using this tool"
+            },
+            "ended_at": {
+              "type": "string",
+              "format": "date",
+              "description": "When engineer stopped using (null if current)"
+            },
+            "reason": {
+              "type": "string",
+              "enum": ["experiment", "team_standard", "personal_preference", "migration"],
+              "description": "Why this tool was adopted"
+            },
+            "metrics_before": {
+              "type": "object",
+              "description": "Metrics in the 30 days before adoption",
+              "properties": {
+                "code_quality_score": {"type": "number"},
+                "velocity_commits_per_week": {"type": "number"},
+                "pr_approval_rate": {"type": "number"},
+                "bug_rate": {"type": "number"}
+              }
+            },
+            "metrics_after": {
+              "type": "object",
+              "description": "Metrics in the 30 days after adoption",
+              "properties": {
+                "code_quality_score": {"type": "number"},
+                "velocity_commits_per_week": {"type": "number"},
+                "pr_approval_rate": {"type": "number"},
+                "bug_rate": {"type": "number"}
+              }
+            },
+            "satisfaction_score": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5,
+              "description": "Engineer satisfaction with this tool (1-5)"
+            },
+            "notes": {
+              "type": "string",
+              "description": "Engineer's feedback about this tool"
+            }
+          },
+          "required": ["tool_id", "category", "started_at"]
+        }
+      },
+      "experiment_participation": {
+        "type": "array",
+        "description": "Tool experiments this engineer is participating in",
+        "items": {
+          "type": "object",
+          "properties": {
+            "experiment_id": {"type": "string"},
+            "cohort": {"type": "string", "enum": ["treatment", "control"]},
+            "status": {"type": "string", "enum": ["active", "completed", "withdrawn"]},
+            "weekly_feedback": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "week": {"type": "integer"},
+                  "satisfaction": {"type": "number", "minimum": 1, "maximum": 5},
+                  "challenges": {"type": "string"},
+                  "wins": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "required": ["engineer_name", "engineer_email", "tool_stack"]
+  },
+
+  "team_tool_analytics": {
+    "type": "object",
+    "description": "Aggregated tool effectiveness data",
+    "properties": {
+      "last_updated": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "timeframe_days": {
+        "type": "integer",
+        "description": "Analysis window in days (default 30)"
+      },
+      "by_tool": {
+        "type": "object",
+        "description": "Metrics grouped by tool",
+        "patternProperties": {
+          "^[a-z-]+$": {
+            "type": "object",
+            "properties": {
+              "tool_id": {"type": "string"},
+              "category": {"type": "string"},
+              "user_count": {"type": "integer"},
+              "avg_metrics": {
+                "type": "object",
+                "properties": {
+                  "code_quality_score": {"type": "number"},
+                  "velocity_commits_per_week": {"type": "number"},
+                  "pr_approval_rate": {"type": "number"},
+                  "bug_rate": {"type": "number"},
+                  "test_coverage_percent": {"type": "number"},
+                  "satisfaction_score": {"type": "number"}
+                }
+              },
+              "percentile_rank": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "How this tool ranks vs others in category (0-100)"
+              },
+              "recommendation": {
+                "type": "string",
+                "enum": ["promote_to_standard", "keep_experimental", "deprecate", "need_more_data"],
+                "description": "Data-driven recommendation"
+              }
+            }
+          }
+        }
+      },
+      "by_category": {
+        "type": "object",
+        "description": "Tool comparison within each category",
+        "patternProperties": {
+          "^[a-z_]+$": {
+            "type": "object",
+            "properties": {
+              "category": {"type": "string"},
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tool_id": {"type": "string"},
+                    "rank": {"type": "integer"},
+                    "score": {"type": "number"},
+                    "user_count": {"type": "integer"},
+                    "improvement_vs_baseline": {"type": "number"}
+                  }
+                }
+              },
+              "winner": {
+                "type": "string",
+                "description": "Best performing tool in this category"
+              },
+              "statistical_significance": {
+                "type": "number",
+                "description": "p-value for winner (< 0.05 = significant)"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "example_engineer_profile": {
+    "engineer_name": "Alice Thompson",
+    "engineer_email": "alice@example.com",
+    "tool_stack": {
+      "linting": "eslint-strict",
+      "testing": "vitest",
+      "git_workflow": "trunk-based",
+      "ide": "cursor",
+      "commit_style": "conventional-commits",
+      "code_review": "github-pr",
+      "ai_assistant": "claude-code"
+    },
+    "tool_history": [
+      {
+        "tool_id": "eslint-strict",
+        "category": "linting",
+        "started_at": "2026-01-15",
+        "ended_at": null,
+        "reason": "experiment",
+        "metrics_before": {
+          "code_quality_score": 72,
+          "velocity_commits_per_week": 11,
+          "pr_approval_rate": 0.78,
+          "bug_rate": 0.18
+        },
+        "metrics_after": {
+          "code_quality_score": 85,
+          "velocity_commits_per_week": 12,
+          "pr_approval_rate": 0.92,
+          "bug_rate": 0.08
+        },
+        "satisfaction_score": 4.5,
+        "notes": "Stricter rules caught bugs earlier. Small learning curve but worth it."
+      },
+      {
+        "tool_id": "cursor",
+        "category": "ide",
+        "started_at": "2026-02-01",
+        "ended_at": null,
+        "reason": "personal_preference",
+        "metrics_before": {
+          "code_quality_score": 85,
+          "velocity_commits_per_week": 12
+        },
+        "metrics_after": {
+          "code_quality_score": 88,
+          "velocity_commits_per_week": 15
+        },
+        "satisfaction_score": 5.0,
+        "notes": "AI suggestions are incredible. 25% faster coding."
+      }
+    ],
+    "experiment_participation": [
+      {
+        "experiment_id": "exp-001-strict-linting",
+        "cohort": "treatment",
+        "status": "completed",
+        "weekly_feedback": [
+          {
+            "week": 1,
+            "satisfaction": 3.0,
+            "challenges": "Too many errors at first",
+            "wins": "Caught 3 potential bugs"
+          },
+          {
+            "week": 4,
+            "satisfaction": 4.5,
+            "challenges": "None",
+            "wins": "Code quality way up, PRs approved faster"
+          }
+        ]
+      }
+    ]
+  },
+
+  "example_team_analytics": {
+    "last_updated": "2026-02-09T10:00:00Z",
+    "timeframe_days": 30,
+    "by_tool": {
+      "eslint-strict": {
+        "tool_id": "eslint-strict",
+        "category": "linting",
+        "user_count": 4,
+        "avg_metrics": {
+          "code_quality_score": 85,
+          "velocity_commits_per_week": 12,
+          "pr_approval_rate": 0.89,
+          "bug_rate": 0.09,
+          "satisfaction_score": 4.3
+        },
+        "percentile_rank": 95,
+        "recommendation": "promote_to_standard"
+      },
+      "eslint-base": {
+        "tool_id": "eslint-base",
+        "category": "linting",
+        "user_count": 3,
+        "avg_metrics": {
+          "code_quality_score": 78,
+          "velocity_commits_per_week": 11,
+          "pr_approval_rate": 0.82,
+          "bug_rate": 0.14,
+          "satisfaction_score": 4.0
+        },
+        "percentile_rank": 68,
+        "recommendation": "keep_experimental"
+      }
+    },
+    "by_category": {
+      "linting": {
+        "category": "linting",
+        "tools": [
+          {
+            "tool_id": "eslint-strict",
+            "rank": 1,
+            "score": 85,
+            "user_count": 4,
+            "improvement_vs_baseline": 0.12
+          },
+          {
+            "tool_id": "eslint-base",
+            "rank": 2,
+            "score": 78,
+            "user_count": 3,
+            "improvement_vs_baseline": 0.0
+          },
+          {
+            "tool_id": "biome",
+            "rank": 3,
+            "score": 80,
+            "user_count": 1,
+            "improvement_vs_baseline": 0.05
+          }
+        ],
+        "winner": "eslint-strict",
+        "statistical_significance": 0.032
+      }
+    }
+  }
+}

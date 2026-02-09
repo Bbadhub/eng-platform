@@ -12,9 +12,11 @@
 This repository contains:
 - **Shared configs** - ESLint, Prettier, TypeScript, Git hooks
 - **Templates** - CLAUDE.md, PR templates, CI workflows
-- **Custom MCP servers** - ARE/QRE engines, basin analysis, constraint validation
+- **Custom MCP servers** - ARE/QRE engines, basin analysis, constraint validation, team analytics
 - **MCP curation** - Evaluated marketplace servers with version control
 - **Automation scripts** - Audit, compliance checking, migration
+- **Tool experimentation** - A/B testing framework for data-driven standardization
+- **Team analytics** - Track tool effectiveness and engineer health
 - **Process docs** - Code review, protected code, sprint workflow
 
 ---
@@ -42,14 +44,35 @@ echo 'module.exports = require("./eng-platform/configs/eslint/react")' > .eslint
 
 ### For Existing Projects
 ```bash
+# Add eng-platform to existing project (3 strategies)
+# See: docs/runbooks/apply-to-existing-project.md
+
+# Strategy A: Git Submodule (Recommended)
+git submodule add https://github.com/Bbadhub/eng-platform.git .eng-platform
+
+# Strategy B: Copy Files (Simple)
+git clone https://github.com/Bbadhub/eng-platform.git ../eng-platform
+
 # Run audit
 ./eng-platform/scripts/audit-project.sh
 
 # Check compliance
 ./eng-platform/scripts/check-compliance.sh
+```
 
-# Apply standards
-./eng-platform/scripts/migrate-to-platform.sh
+### Tool Experimentation (NEW)
+```bash
+# Track which tools your team uses and measure effectiveness
+# See: tools-registry.json for available tools
+
+# Start an experiment
+node scripts/manage-experiments.js start exp-001-strict-linting
+
+# Record weekly progress
+node scripts/manage-experiments.js checkpoint exp-001-strict-linting
+
+# Complete and analyze
+node scripts/manage-experiments.js complete exp-001-strict-linting
 ```
 
 ---
@@ -65,6 +88,9 @@ eng-platform/
 │   ├── commitlint/          # Conventional commits enforcement
 │   ├── husky/               # Git hooks
 │   └── playwright-reporters/ # Custom Playwright reporters
+├── experiments/             # Tool A/B testing framework (NEW)
+│   ├── tool-experiments.json    # Active/completed experiments
+│   └── experiment-schema.json   # Experiment data schema
 ├── templates/               # Templates and hooks
 │   ├── protection-guard-hook/ # PreToolUse hook for code protection
 │   └── github/              # PR templates, CI workflows
@@ -82,10 +108,12 @@ eng-platform/
 │   └── ...                 # + 4 more
 ├── mcp/                     # MCP marketplace curation
 ├── scripts/                 # Automation tools
+│   ├── manage-experiments.js # Tool experiment management (NEW)
 │   ├── test-determinism-gate.js # Anti-hallucination tests
 │   ├── team-sync-check.js   # Environment validation
 │   ├── setup-posthog-flags.js # Feature flag management
 │   └── metrics/             # DORA metrics collection
+├── tools-registry.json      # Tool catalog for experimentation (NEW)
 ├── workflows/               # CI/CD workflows (5 workflows)
 │   ├── nightly-e2e.yml      # Cross-browser E2E tests
 │   ├── regression-tests.yml # 5-layer regression
@@ -109,6 +137,13 @@ eng-platform/
 - [CLAUDE.md Template](templates/CLAUDE.md) - AI context file structure
 - [PR Template](templates/github/PR_TEMPLATE.md) - Pull request template
 - [CI Workflows](templates/ci/) - GitHub Actions templates
+
+### Tool Experimentation & Analytics (NEW in v1.0.0)
+- **[tools-registry.json](tools-registry.json)** - Catalog of development tools for tracking and experimentation
+- **[Experiments Framework](experiments/)** - A/B testing system for tools
+- **[team-analytics MCP](mcp-servers/team-analytics/)** - Engineer health monitoring with tool effectiveness tracking
+- **[Experiment Management](scripts/manage-experiments.js)** - CLI for running controlled tool experiments
+- **[Apply to Project Guide](docs/runbooks/apply-to-existing-project.md)** - 3 strategies for syncing eng-platform to repos
 
 ### Custom MCP Servers (NEW in v0.2.0)
 - **[9 Domain-Agnostic Servers](mcp-servers/README.md)** - Production-ready MCP implementations

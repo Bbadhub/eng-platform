@@ -1,0 +1,74 @@
+name: Auto-Update Projects with Latest Standards
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'configs/**'
+      - 'templates/**'
+      - 'tools-registry.json'
+  workflow_dispatch:
+    inputs:
+      projects:
+        description: 'Comma-separated list of projects to update (or "all")'
+        required: true
+        default: 'all'
+
+jobs:
+  update-projects:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - legalai-system
+          - adhub
+          # Add more projects here
+
+    steps:
+      - name: Checkout eng-platform
+        uses: actions/checkout@v4
+        with:
+          path: eng-platform
+
+      - name: Checkout project repository
+        uses: actions/checkout@v4
+        with:
+          repository: Bbadhub/${{ matrix.project }}
+          path: ${{ matrix.project }}
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Check if project uses eng-platform submodule
+        id: check-submodule
+        run: |
+          cd ${{ matrix.project }}
+          if [ -f .gitmodules ] && grep -q "eng-platform" .gitmodules; then
+            echo "uses_submodule=true" >> $GITHUB_OUTPUT
+          else
+            echo "uses_submodule=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update submodule (if using submodule strategy)
+        if: steps.check-submodule.outputs.uses_submodule == 'true'
+        run: |
+          cd ${{ matrix.project }}
+          git submodule update --remote .eng-platform
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --staged --quiet; then
+            echo "No updates needed"
+          else
+            git add .eng-platform
+            git commit -m "chore: update eng-platform to latest standards"
+            git push
+          fi
+
+      - name: Create PR for manual sync (if not using submodule)
+        if: steps.check-submodule.outputs.uses_submodule == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            // TODO: Copy updated files and create PR
+            console.log('Project does not use submodule. Manual sync required.');
