@@ -25,10 +25,23 @@ This is an established project with existing code, so be careful:
    - Run: git submodule update --init --recursive
 
 3. Set up MCP servers by creating or updating .mcp.json:
-   - Add beads-integration MCP server
-   - Add team-analytics MCP server
-   - If .mcp.json exists, merge with existing servers
-   - If it doesn't exist, create it
+
+   **Core AI Enhancement Servers (always add):**
+   - beads-integration - BEADS task management
+   - team-analytics - Engineer profiles & metrics
+   - research-swarm - AI research with confidence tracking
+   - basin-analyzer - Context drift detection (validates AI outputs)
+   - report-writer - Automated report generation
+   - constraint-validator - Logic validation and conflict detection
+
+   **Database Servers (add if detected):**
+   - postgres - If project uses PostgreSQL (check for pg, postgres, or Prisma with postgresql)
+   - mysql - If project uses MySQL (check for mysql2, mysql, or Prisma with mysql)
+
+   **Optional Servers (prompt before adding):**
+   - smart-memory - Auto-detects project context (recommended if 3+ projects in parent directory)
+
+   If .mcp.json exists, merge with existing servers. If it doesn't exist, create it.
 
 4. Create sprints/ directory if it doesn't exist
 
@@ -41,17 +54,51 @@ This is an established project with existing code, so be careful:
    - Initialize my metrics tracking
 
 7. Install MCP server dependencies:
+
+   **Node.js servers:**
    - cd .eng-platform/mcp-servers/beads-integration && npm install
    - cd .eng-platform/mcp-servers/team-analytics && npm install
-   - Report any installation issues
+   - cd .eng-platform/mcp-servers/research-swarm && npm install
+   - cd .eng-platform/mcp-servers/report-writer && npm install
+   - cd .eng-platform/mcp-servers/postgres && npm install (if added)
+   - cd .eng-platform/mcp-servers/mysql && npm install (if added)
+   - cd .eng-platform/mcp-servers/smart-memory && npm install (if added)
+
+   **Python servers (check if Python 3.8+ is installed):**
+   - cd .eng-platform/mcp-servers/basin-analyzer && pip install -r requirements.txt
+   - cd .eng-platform/mcp-servers/constraint-validator && pip install -r requirements.txt
+
+   Report any installation issues
 
 8. Show me a summary of:
    - What was added
    - What already existed (and was kept)
+   - Which MCP servers were configured (core, database, optional)
    - Any conflicts or issues
+   - Environment variables needed (VOYAGE_API_KEY, DEEPSEEK_API_KEY for basin-analyzer)
    - Next steps I should take
 
 Do NOT overwrite my existing configs (ESLint, Prettier, TypeScript) unless I explicitly ask you to. Just add the submodule and MCP servers.
+
+---
+
+## 🤖 What These MCP Servers Do
+
+**Core AI Enhancement Servers:**
+- **beads-integration**: Task decomposition and subtask management
+- **team-analytics**: Engineer profiles, metrics, and tool recommendations
+- **research-swarm**: Multi-step research with confidence tracking (prevents hallucinations)
+- **basin-analyzer**: Detects AI output drift and validates consistency (AI quality control)
+- **report-writer**: Structured report generation with quality scoring
+- **constraint-validator**: Logic validation and conflict detection (catches contradictions)
+
+**Database Servers:**
+- **postgres/mysql**: Direct database access for schema inspection and queries
+
+**Optional:**
+- **smart-memory**: Auto-detects project context and namespaces memories (useful if you have 3+ projects)
+
+These servers enhance AI agent reliability, research quality, and output validation - like having ESLint/Prettier/Jest for AI agents.
 
 ---
 
