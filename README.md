@@ -1,8 +1,8 @@
-# Engineering Platform v0.1.0
+# Engineering Platform v0.2.0
 
 > Unified engineering standards, tools, and templates for all projects.
 
-**Status:** Alpha - Generated from LegalAI_System audit
+**Status:** Alpha - LegalAI configs + Custom MCP servers
 **Next:** Add Repo #2 audit → Consolidate to v1.0.0
 
 ---
@@ -12,7 +12,8 @@
 This repository contains:
 - **Shared configs** - ESLint, Prettier, TypeScript, Git hooks
 - **Templates** - CLAUDE.md, PR templates, CI workflows
-- **MCP curation** - Evaluated MCP servers with version control
+- **Custom MCP servers** - ARE/QRE engines, basin analysis, constraint validation
+- **MCP curation** - Evaluated marketplace servers with version control
 - **Automation scripts** - Audit, compliance checking, migration
 - **Process docs** - Code review, protected code, sprint workflow
 
@@ -61,7 +62,14 @@ eng-platform/
 │   └── legalai-system/      # Phase 1-3 audit outputs
 ├── configs/                 # Shared ESLint, Prettier, TS configs
 ├── templates/               # PR templates, CLAUDE.md, CI workflows
-├── mcp/                     # MCP server curation system
+├── mcp-servers/             # Custom-built MCP servers (9 servers)
+│   ├── research-swarm/      # ARE/QRE research engine
+│   ├── basin-analyzer/      # Context drift detection
+│   ├── constraint-validator/ # Z3 SMT solver
+│   ├── report-writer/       # Report generation
+│   ├── ragflow/            # RAG orchestration
+│   └── ...                 # + 4 more
+├── mcp/                     # MCP marketplace curation
 ├── scripts/                 # Automation tools
 └── docs/                    # Process documentation
 ```
@@ -83,8 +91,16 @@ eng-platform/
 - [PR Template](templates/github/PR_TEMPLATE.md) - Pull request template
 - [CI Workflows](templates/ci/) - GitHub Actions templates
 
-### MCP Servers
-- [Curated List](mcp/mcp-servers.json) - Tier 1/2/3 servers with versions
+### Custom MCP Servers (NEW in v0.2.0)
+- **[9 Domain-Agnostic Servers](mcp-servers/README.md)** - Production-ready MCP implementations
+- **[research-swarm](mcp-servers/research-swarm/)** - ARE/QRE multi-step research engine
+- **[basin-analyzer](mcp-servers/basin-analyzer/)** - Context drift detection & confidence scoring
+- **[constraint-validator](mcp-servers/constraint-validator/)** - Z3 SMT solver for conflict detection
+- **[report-writer](mcp-servers/report-writer/)** - Automated report generation
+- + 5 more (ragflow, postgres, mysql, dropbox, mcp-saas-template)
+
+### MCP Marketplace Curation
+- [Curated List](mcp/mcp-servers.json) - Tier 1/2/3 marketplace servers
 - [Evaluation Criteria](mcp/evaluation-criteria.md) - How to evaluate new servers
 - [Evaluation Log](mcp/evaluation-log.md) - Decision history
 
@@ -102,11 +118,20 @@ eng-platform/
 
 ## 📊 Version History
 
+### v0.2.0 (2026-02-08) - Custom MCP Servers
+- **9 domain-agnostic MCP servers** extracted from LegalAI
+- **research-swarm** - ARE/QRE research engine with formula scoring
+- **basin-analyzer** - Context drift detection (epsilon metric, basin clustering)
+- **constraint-validator** - Z3 SMT solver for logical conflicts
+- **report-writer** - Automated report generation
+- **ragflow** - RAG orchestration with Elasticsearch
+- + postgres, mysql, dropbox, mcp-saas-template
+
 ### v0.1.0 (2026-02-08) - Initial Release
 - Generated from LegalAI_System audit (Phase 1-3)
 - Base configs for ESLint, Prettier, TypeScript
 - CLAUDE.md template with protected code pattern
-- MCP curation system (Tier 1: 5 servers)
+- MCP marketplace curation (Tier 1: 5 servers)
 - Audit & compliance scripts
 
 ### Coming in v1.0.0
@@ -121,11 +146,13 @@ eng-platform/
 
 - [x] Phase 1-3: Audit LegalAI_System
 - [x] Generate v0.1.0 from LegalAI audit
+- [x] Extract custom MCP servers → v0.2.0
 - [ ] Phase 1-3: Audit Repo #2
 - [ ] Consolidate findings → v1.0.0
 - [ ] Apply to both repos
 - [ ] Quarterly MCP reviews
-- [ ] Publish as npm packages
+- [ ] Publish MCP servers as standalone packages
+- [ ] Publish configs as npm packages
 
 ---
 
