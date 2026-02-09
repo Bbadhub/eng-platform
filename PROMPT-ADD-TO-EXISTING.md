@@ -45,12 +45,43 @@ This is an established project with existing code, so be careful:
 
    If .mcp.json exists, merge with existing servers. If it doesn't exist, create it.
 
+   **Example .mcp.json structure (for reference):**
+   ```json
+   {
+     "mcpServers": {
+       "beads-integration": {
+         "command": "node",
+         "args": ["${workspaceFolder}/.eng-platform/mcp-servers/beads-integration/server.js"]
+       },
+       "team-analytics": {
+         "command": "node",
+         "args": ["${workspaceFolder}/.eng-platform/mcp-servers/team-analytics/server.js"]
+       },
+       "smart-memory": {
+         "command": "node",
+         "args": ["${workspaceFolder}/.eng-platform/mcp-servers/smart-memory/index.js"],
+         "env": {
+           "MEMORY_FILE_PATH": "${workspaceFolder}/.shared/team-memory.json"
+         }
+       }
+     }
+   }
+   ```
+
 4. Create sprints/ directory if it doesn't exist
 
 5. Initialize shared team memory (for smart-memory MCP server):
    - Create .shared/ directory if it doesn't exist
    - If .shared/team-memory.json doesn't exist:
-     * Copy structure from .eng-platform/.shared/team-memory-structure-example.json
+     * If .eng-platform/.shared/team-memory-structure-example.json exists, copy it
+     * Otherwise create with initial structure:
+       {
+         "version": "1.0.0",
+         "last_updated": "<current ISO timestamp>",
+         "entities": {},
+         "relations": [],
+         "observations": []
+       }
      * Get current project name from package.json or directory name
      * Add current project to entities with detected tech stack
      * Set last_updated to current timestamp
@@ -89,15 +120,18 @@ This is an established project with existing code, so be careful:
    - cd .eng-platform/mcp-servers/smart-memory && npm install (if added)
 
    **Python servers (check if Python 3.8+ is installed):**
+   - Check which pip command to use (pip3 or pip)
    - cd .eng-platform/mcp-servers/basin-analyzer && pip install -r requirements.txt
    - cd .eng-platform/mcp-servers/constraint-validator && pip install -r requirements.txt
 
    Report any installation issues
 
-11. Commit the eng-platform integration:
-   - Stage all changes (git add)
-   - Create commit: "chore: integrate eng-platform with MCP servers"
-   - List what was added in commit message
+11. Review changes before committing:
+   - Run git status and show all modified/added files
+   - Recommend commit message: "chore: integrate eng-platform with MCP servers"
+   - List what will be committed
+   - Ask: "Ready to commit these changes? (y/n)"
+   - Only commit if I confirm yes
 
 12. Show me a summary of:
    - What was added
