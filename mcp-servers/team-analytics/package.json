@@ -1,0 +1,26 @@
+{
+  "name": "team-analytics-mcp",
+  "version": "1.0.0",
+  "description": "Proactive engineer health monitoring and training recommendations",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "team-analytics-mcp": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "analytics",
+    "team",
+    "health",
+    "monitoring"
+  ],
+  "author": "Your Team",
+  "license": "MIT"
+}

@@ -1,0 +1,40 @@
+{
+  "memoryPath": "../../.shared/team-memory.json",
+  "repoPath": "../../../LegalAI_System",
+  "engineers": [
+    {
+      "name": "Brett",
+      "email": "brett@example.com"
+    },
+    {
+      "name": "Alice Thompson",
+      "email": "alice@example.com"
+    },
+    {
+      "name": "Bob Martinez",
+      "email": "bob@example.com"
+    },
+    {
+      "name": "Charlie Lee",
+      "email": "charlie@example.com"
+    }
+  ],
+  "alert_thresholds": {
+    "critical": {
+      "code_quality": 50,
+      "overall_score": 50,
+      "bug_rate": 0.25
+    },
+    "warning": {
+      "code_quality": 65,
+      "overall_score": 65,
+      "velocity_drop": -0.20
+    }
+  },
+  "scoring_weights": {
+    "code_quality": 0.35,
+    "knowledge_sharing": 0.25,
+    "velocity": 0.25,
+    "collaboration": 0.15
+  }
+}
