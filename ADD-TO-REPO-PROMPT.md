@@ -150,6 +150,31 @@ cat .eng-platform/mcp-servers/team-analytics/data/engineer-tool-profiles.json | 
 
 ---
 
+## 🔄 Contributing Back (Complete the Loop)
+
+**After you've built something useful in your project:**
+
+```
+"I want to contribute [tool-name] to eng-platform"
+```
+
+See [CONTRIBUTE-TOOL-PROMPT.md](CONTRIBUTE-TOOL-PROMPT.md) for the complete two-way workflow.
+
+**Examples of what to contribute:**
+- Custom MCP servers you've built
+- Useful scripts or automation
+- New config variations (ESLint rules, etc.)
+- Patterns or ADRs that worked well
+- Workflow improvements
+
+**The loop:**
+1. Add eng-platform to your project (this prompt)
+2. Build tools and find what works
+3. Contribute them back (CONTRIBUTE-TOOL-PROMPT.md)
+4. Everyone benefits via `git submodule update --remote`
+
+---
+
 ## 💡 Pro Tip
 
 **Before running:**
