@@ -40,20 +40,34 @@ This is an established project with existing code, so be careful:
 
    **Optional Servers (prompt before adding):**
    - smart-memory - Auto-detects project context (recommended if 3+ projects in parent directory)
+     * Configure MEMORY_FILE_PATH to use .shared/team-memory.json
+     * This enables team-wide memory sharing across projects
 
    If .mcp.json exists, merge with existing servers. If it doesn't exist, create it.
 
 4. Create sprints/ directory if it doesn't exist
 
-5. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
+5. Initialize shared team memory (for smart-memory MCP server):
+   - Create .shared/ directory if it doesn't exist
+   - If .shared/team-memory.json doesn't exist:
+     * Copy structure from .eng-platform/.shared/team-memory-structure-example.json
+     * Get current project name from package.json or directory name
+     * Add current project to entities with detected tech stack
+     * Set last_updated to current timestamp
+   - If .shared/team-memory.json exists:
+     * Validate structure (has entities, relations, observations)
+     * Add current project if not already present
+     * Keep existing data intact
 
-6. Add me to engineer profiles:
+6. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
+
+7. Add me to engineer profiles:
    - Get my name and email from git config
    - Add me to .eng-platform/mcp-servers/team-analytics/data/engineer-tool-profiles.json
    - Set tool_stack by detecting what I currently use (ESLint, Prettier, IDE, etc.)
    - Initialize my metrics tracking
 
-7. Install MCP server dependencies:
+8. Install MCP server dependencies:
 
    **Node.js servers:**
    - cd .eng-platform/mcp-servers/beads-integration && npm install
@@ -70,10 +84,11 @@ This is an established project with existing code, so be careful:
 
    Report any installation issues
 
-8. Show me a summary of:
+9. Show me a summary of:
    - What was added
    - What already existed (and was kept)
    - Which MCP servers were configured (core, database, optional)
+   - Team memory initialization status (.shared/team-memory.json)
    - Any conflicts or issues
    - Environment variables needed (VOYAGE_API_KEY, DEEPSEEK_API_KEY for basin-analyzer)
    - Next steps I should take
