@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "0.1.0",
+  "last_updated": "2026-02-08",
+  "evaluation_date": "2026-02-08",
+
+  "tier1": [
+    {
+      "name": "postgres",
+      "npm_package": "@modelcontextprotocol/server-postgres",
+      "github": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+      "version": "latest",
+      "use_case": "All projects with PostgreSQL",
+      "tools_count": 8,
+      "overhead": "low",
+      "maintenance_status": "active",
+      "stars": "Official MCP implementation",
+      "last_commit": "2026-02",
+      "notes": "Essential for database access"
+    },
+    {
+      "name": "github",
+      "npm_package": "@github/github-mcp-server",
+      "github": "https://github.com/github/github-mcp-server",
+      "version": "latest",
+      "use_case": "All projects - PR/Issue/Actions integration",
+      "tools_count": 20,
+      "overhead": "low",
+      "maintenance_status": "active",
+      "stars": "Official GitHub implementation",
+      "last_commit": "2026-02",
+      "notes": "Automate PR reviews, trigger workflows"
+    },
+    {
+      "name": "cccmemory",
+      "npm_package": "cccmemory",
+      "github": "https://github.com/xiaolai/cccmemory",
+      "version": "latest",
+      "use_case": "Long-running projects - conversation memory",
+      "tools_count": 6,
+      "overhead": "low",
+      "maintenance_status": "active",
+      "stars": "500+",
+      "last_commit": "2026-01",
+      "notes": "Persistent memory across Claude Code sessions"
+    },
+    {
+      "name": "filesystem",
+      "npm_package": "@modelcontextprotocol/server-filesystem",
+      "github": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "version": "latest",
+      "use_case": "All projects - secure file operations",
+      "tools_count": 8,
+      "overhead": "minimal",
+      "maintenance_status": "active",
+      "stars": "Official MCP implementation",
+      "last_commit": "2026-02",
+      "notes": "Replaces custom file access servers"
+    },
+    {
+      "name": "elasticsearch",
+      "npm_package": "@elastic/mcp-server-elasticsearch",
+      "github": "https://github.com/elastic/mcp-server-elasticsearch",
+      "version": "latest",
+      "use_case": "Projects with Elasticsearch",
+      "tools_count": 4,
+      "overhead": "low",
+      "maintenance_status": "active",
+      "stars": "Official Elastic implementation",
+      "last_commit": "2025-12",
+      "notes": "Direct ES queries, semantic search"
+    }
+  ],
+
+  "tier2": [
+    {
+      "name": "playwright",
+      "npm_package": "@modelcontextprotocol/server-playwright",
+      "github": "https://github.com/modelcontextprotocol/servers/tree/main/src/playwright",
+      "version": "latest",
+      "use_case": "Projects needing browser automation/scraping",
+      "tools_count": 10,
+      "overhead": "medium",
+      "maintenance_status": "active",
+      "stars": "Official MCP implementation",
+      "last_commit": "2026-02",
+      "notes": "Evaluate before installing - requires Chromium (~300MB)"
+    },
+    {
+      "name": "mcp-memory-service",
+      "github": "https://github.com/doobidoo/mcp-memory-service",
+      "version": "latest",
+      "use_case": "Alternative to cccmemory - automatic context capture",
+      "tools_count": 5,
+      "overhead": "low",
+      "maintenance_status": "active",
+      "stars": "New (Dec 2025)",
+      "last_commit": "2026-01",
+      "notes": "Test alongside cccmemory - choose one"
+    }
+  ],
+
+  "tier3_watch": [
+    {
+      "name": "github-actions-local-testing",
+      "github": "https://github.com/GarthDB/act-testing-mcp",
+      "version": "beta",
+      "use_case": "Test GitHub Actions locally with nektos/act",
+      "reason_watching": "Beta, narrow use case",
+      "check_back": "2026-Q2"
+    }
+  ],
+
+  "domain_specific": {
+    "legal": [
+      {
+        "name": "courtlistener",
+        "github": "https://github.com/khizar-anjum/courtlistener-mcp",
+        "version": "latest",
+        "use_case": "Legal research - CourtListener API integration",
+        "tools_count": 20,
+        "overhead": "low",
+        "notes": "LegalAI-specific, not for general platform"
+      }
+    ]
+  },
+
+  "evaluation_notes": [
+    "Tier 1: Install immediately - battle-tested, high value, low overhead",
+    "Tier 2: Evaluate first - promising but needs testing in your environment",
+    "Tier 3: Watch - interesting but too new, heavy, or overlapping",
+    "Domain-specific: Only install if your project needs that domain"
+  ]
+}
