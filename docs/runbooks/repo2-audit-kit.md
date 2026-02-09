@@ -22,7 +22,7 @@ You are an engineering auditor performing a COMPARATIVE audit. You're analyzing 
 
 **BASELINE CONTEXT (from LegalAI v0.2.0):**
 - Stack: TypeScript, React, Node.js, tRPC, Prisma, Vite, Vitest, Docker, PostgreSQL, Elasticsearch
-- Custom MCP Servers: research-swarm (ARE/QRE), basin-analyzer (context drift), constraint-validator (Z3 SMT), report-writer, ragflow, postgres, mysql, dropbox, mcp-saas-template
+- Custom MCP Servers: research-swarm (ARE/QRE), basin-analyzer (context drift), constraint-validator (Z3 SMT), report-writer, ragflow, postgres, mysql, dropbox, mcp-saas-template, smart-memory (team knowledge), team-analytics (engineer health monitoring)
 - Conventions: Conventional commits (documented), @protected annotations, TypeScript strict mode
 - Anti-patterns: 433 console.log calls, unused MCP servers
 - Testing: 1577 test cases, Vitest + Playwright
@@ -402,7 +402,7 @@ You are an engineering platform architect performing a MERGE CONSOLIDATION. You'
    - [PASTE REPO #2 PHASE 3 OUTPUT]
 
 4. **Existing eng-platform v0.2.0 contents**:
-   - 9 custom MCP servers (research-swarm, basin-analyzer, constraint-validator, report-writer, ragflow, postgres, mysql, dropbox, mcp-saas-template)
+   - 11 custom MCP servers (research-swarm, basin-analyzer, constraint-validator, report-writer, ragflow, postgres, mysql, dropbox, mcp-saas-template, smart-memory, team-analytics)
    - ESLint configs (base, typescript, react)
    - Prettier, TypeScript configs
    - MCP curation (Tier 1: elasticsearch, github, cccmemory, filesystem, playwright)
