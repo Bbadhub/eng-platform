@@ -6,6 +6,10 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -44,7 +48,7 @@ const server = new Server(
 // Start server
 async function main() {
   // Tool definitions
-  server.setRequestHandler('tools/list', async () => {
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
       tools: [
         {
@@ -105,7 +109,7 @@ async function main() {
   });
 
   // Tool handlers
-  server.setRequestHandler('tools/call', async (request) => {
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     try {
