@@ -34,7 +34,18 @@ This is an established project with existing code, so be careful:
 
 5. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
 
-6. Show me a summary of:
+6. Add me to engineer profiles:
+   - Get my name and email from git config
+   - Add me to .eng-platform/mcp-servers/team-analytics/data/engineer-tool-profiles.json
+   - Set tool_stack by detecting what I currently use (ESLint, Prettier, IDE, etc.)
+   - Initialize my metrics tracking
+
+7. Install MCP server dependencies:
+   - cd .eng-platform/mcp-servers/beads-integration && npm install
+   - cd .eng-platform/mcp-servers/team-analytics && npm install
+   - Report any installation issues
+
+8. Show me a summary of:
    - What was added
    - What already existed (and was kept)
    - Any conflicts or issues
