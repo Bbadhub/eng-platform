@@ -59,15 +59,25 @@ This is an established project with existing code, so be careful:
      * Add current project if not already present
      * Keep existing data intact
 
-6. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
+6. Update smart-memory config for this project:
+   - Get git remote URL for this project (git config --get remote.origin.url)
+   - Add to .eng-platform/mcp-servers/smart-memory/config.json under git_repo_mapping
+   - Format: "github.com/user/repo": "project-name"
 
-7. Add me to engineer profiles:
+7. If CLAUDE.md doesn't exist, copy the template from .eng-platform/templates/CLAUDE.md
+
+8. Create .env.example documenting required environment variables:
+   - VOYAGE_API_KEY (for basin-analyzer semantic embeddings)
+   - DEEPSEEK_API_KEY (for basin-analyzer LLM calls)
+   - Add note: "Copy to .env and add your actual API keys"
+
+9. Add me to engineer profiles:
    - Get my name and email from git config
    - Add me to .eng-platform/mcp-servers/team-analytics/data/engineer-tool-profiles.json
    - Set tool_stack by detecting what I currently use (ESLint, Prettier, IDE, etc.)
    - Initialize my metrics tracking
 
-8. Install MCP server dependencies:
+10. Install MCP server dependencies:
 
    **Node.js servers:**
    - cd .eng-platform/mcp-servers/beads-integration && npm install
@@ -84,7 +94,12 @@ This is an established project with existing code, so be careful:
 
    Report any installation issues
 
-9. Show me a summary of:
+11. Commit the eng-platform integration:
+   - Stage all changes (git add)
+   - Create commit: "chore: integrate eng-platform with MCP servers"
+   - List what was added in commit message
+
+12. Show me a summary of:
    - What was added
    - What already existed (and was kept)
    - Which MCP servers were configured (core, database, optional)
