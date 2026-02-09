@@ -42,22 +42,24 @@ npm install --save-dev \
 echo 'module.exports = require("./eng-platform/configs/eslint/react")' > .eslintrc.js
 ```
 
-### For Existing Projects
+### For Existing Projects (RECOMMENDED)
 ```bash
-# Add eng-platform to existing project (3 strategies)
-# See: docs/runbooks/apply-to-existing-project.md
+# Use the LLM prompt for established projects with existing configs
+# See: ADD-TO-EXISTING-PROJECT-PROMPT.md
 
-# Strategy A: Git Submodule (Recommended)
-git submodule add https://github.com/Bbadhub/eng-platform.git .eng-platform
+# Copy this into Claude Code:
+"I want to add eng-platform to this existing project.
 
-# Strategy B: Copy Files (Simple)
-git clone https://github.com/Bbadhub/eng-platform.git ../eng-platform
+This is an established project with existing configs, so:
+1. Don't overwrite existing configs without asking
+2. Analyze current setup first
+3. Show me what conflicts and suggest merge strategy
+4. Add eng-platform as git submodule at .eng-platform/
+5. Set up MCP servers for beads and team-analytics
 
-# Run audit
-./eng-platform/scripts/audit-project.sh
+Be careful - this is production code."
 
-# Check compliance
-./eng-platform/scripts/check-compliance.sh
+# For new/greenfield projects: See ADD-TO-REPO-PROMPT.md
 ```
 
 ### Tool Experimentation (NEW)
