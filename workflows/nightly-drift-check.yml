@@ -1,0 +1,226 @@
+name: Nightly Environment Drift Check
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environments:
+        description: 'Environments to compare (e.g., "staging prod")'
+        required: false
+        default: 'staging prod'
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift-check:
+    name: Environment Drift Detection
+    runs-on: ubuntu-latest
+
+    env:
+      # Development environment
+      DEV_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
+      DEV_SUPABASE_SERVICE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_KEY }}
+      REACT_APP_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_KEY }}
+
+      # Staging environment
+      STAGING_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+      STAGING_SUPABASE_SERVICE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_KEY }}
+
+      # Production environment
+      PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+      PROD_SUPABASE_SERVICE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @supabase/supabase-js dotenv
+
+      - name: Create results directory
+        run: mkdir -p test-results
+
+      - name: Get deployed SHAs
+        id: get-shas
+        run: |
+          echo "📋 Checking deployed commits..."
+          node scripts/deployment/get-deployed-sha.js --output-dir ./test-results
+        continue-on-error: true
+
+      - name: Compare staging vs prod
+        id: compare-staging-prod
+        run: |
+          echo "🔍 Comparing staging vs production..."
+          node scripts/deployment/compare-environments.js --env1 staging --env2 prod --output-dir ./test-results || echo "drift_detected=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Compare dev vs staging
+        id: compare-dev-staging
+        run: |
+          echo "🔍 Comparing dev vs staging..."
+          node scripts/deployment/compare-environments.js --env1 dev --env2 staging --output-dir ./test-results || echo "drift_detected=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Upload drift reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: environment-drift-reports
+          path: |
+            test-results/environment-drift-report.json
+            test-results/environment-drift-summary.md
+            test-results/deployed-sha-manifest.json
+          retention-days: 30
+
+      - name: Check for drift
+        id: check-drift
+        run: |
+          if [ -f "test-results/environment-drift-report.json" ]; then
+            DRIFT=$(cat test-results/environment-drift-report.json | jq -r '.drift_detected // false')
+            HIGH_SEV=$(cat test-results/environment-drift-report.json | jq -r '.comparisons[0].summary.high // 0')
+
+            echo "drift_detected=$DRIFT" >> $GITHUB_OUTPUT
+            echo "high_severity=$HIGH_SEV" >> $GITHUB_OUTPUT
+
+            if [ "$HIGH_SEV" -gt 0 ]; then
+              echo "requires_action=true" >> $GITHUB_OUTPUT
+            else
+              echo "requires_action=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Post to Slack (if drift detected)
+        if: steps.check-drift.outputs.requires_action == 'true' && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "🔄 Environment Drift Detected",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🔄 Environment Drift Detected"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Schema differences found between environments.\n\n*High Severity Issues:* ${{ steps.check-drift.outputs.high_severity }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Action Required:*\n• Review the differences\n• Apply missing migrations\n• Acknowledge or fix within 24h"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {"type": "plain_text", "text": "View Report"},
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }' \
+            $SLACK_WEBHOOK_URL
+
+      - name: Create issue for high severity drift
+        if: steps.check-drift.outputs.requires_action == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let summary = 'Environment drift detected. See workflow artifacts for details.';
+            try {
+              summary = fs.readFileSync('test-results/environment-drift-summary.md', 'utf8');
+            } catch (e) {}
+
+            const title = '🔄 Environment Drift Detected - Action Required';
+            const body = `## Nightly Environment Drift Alert
+
+            **Workflow Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **High Severity Issues:** ${{ steps.check-drift.outputs.high_severity }}
+
+            ### Report
+            ${summary}
+
+            ### Required Action
+            1. Review the schema differences
+            2. Determine which environment has the correct schema
+            3. Apply missing migrations to sync environments
+            4. Close this issue once resolved
+
+            **Deadline:** Acknowledge or fix within 24 hours
+
+            ---
+            *This issue was automatically created by the Nightly Drift Check workflow.*
+            `;
+
+            // Check for existing open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'environment-drift'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['environment-drift', 'needs-review', 'priority-high']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `## New Drift Detected\n\n${summary}\n\n**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+              });
+            }
+
+      - name: Summary
+        run: |
+          echo "## Environment Drift Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "test-results/deployed-sha-manifest.json" ]; then
+            echo "### Deployed Commits" >> $GITHUB_STEP_SUMMARY
+            cat test-results/deployed-sha-manifest.json | jq -r '.environments | to_entries[] | "- **\(.key):** \(.value.short_sha // .value.error // "unknown")"' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "test-results/environment-drift-summary.md" ]; then
+            echo "### Drift Report" >> $GITHUB_STEP_SUMMARY
+            cat test-results/environment-drift-summary.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No drift detected" >> $GITHUB_STEP_SUMMARY
+          fi

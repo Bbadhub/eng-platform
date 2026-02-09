@@ -1,0 +1,380 @@
+name: Database Schema Validation
+
+on:
+  push:
+    branches: [main, dev, staging]
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validation/check_db_schema.js"
+      - "scripts/testing/test-database-schema.js"
+      - "scripts/testing/tenant-isolation-tests.js"
+      - ".github/workflows/database-validation.yml"
+  pull_request:
+    branches: [main, dev, staging]
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validation/check_db_schema.js"
+      - "scripts/testing/test-database-schema.js"
+      - "scripts/testing/tenant-isolation-tests.js"
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      run_performance_tests:
+        description: "Run performance benchmarks"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  database-validation:
+    name: Database Schema Validation
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    env:
+      REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NODE_ENV: ${{ github.event.inputs.environment || 'development' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @supabase/supabase-js dotenv
+
+      - name: Create test results directory
+        run: mkdir -p test-results
+
+      - name: Run database schema validation
+        id: schema-validation
+        run: |
+          echo "Running database schema validation..."
+          node scripts/validation/check_db_schema.js
+        continue-on-error: true
+
+      - name: Run comprehensive database tests
+        id: database-tests
+        run: |
+          echo "Running comprehensive database tests..."
+          node scripts/testing/test-database-schema.js --environment ${{ env.NODE_ENV }} --output-dir ./test-results
+        continue-on-error: true
+
+      - name: Run tenant isolation tests
+        id: tenant-isolation
+        run: |
+          echo "Running tenant isolation tests..."
+          node scripts/testing/tenant-isolation-tests.js --output-dir=./test-results
+        # DO NOT use continue-on-error - tenant isolation failures are critical
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: database-test-results-node-${{ matrix.node-version }}
+          path: test-results/
+          retention-days: 30
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Database Tests (Node.js ${{ matrix.node-version }})
+          path: test-results/database-test-results.xml
+          reporter: java-junit
+
+      - name: Comment PR with test results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && always()
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './test-results/database-test-summary.md';
+
+            if (fs.existsSync(path)) {
+              const summary = fs.readFileSync(path, 'utf8');
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🗄️ Database Validation Results (Node.js ${{ matrix.node-version }})\n\n${summary}`
+              });
+            }
+
+      - name: Set job status based on test results
+        run: |
+          # Check schema validation report (written to scripts/validation/)
+          SCHEMA_REPORT="scripts/validation/database-validation-report.json"
+          TENANT_REPORT="test-results/tenant-isolation-report.json"
+
+          FAILED=0
+
+          # Check schema validation
+          if [ -f "$SCHEMA_REPORT" ]; then
+            SUCCESS_RATE=$(cat "$SCHEMA_REPORT" | jq -r '.summary.success_rate // 0')
+            echo "Schema validation success rate: $SUCCESS_RATE%"
+            if [ "$SUCCESS_RATE" -lt 90 ]; then
+              echo "❌ Schema validation failed with $SUCCESS_RATE% success rate"
+              FAILED=1
+            fi
+          else
+            echo "⚠️ No schema validation report found at $SCHEMA_REPORT"
+          fi
+
+          # Check tenant isolation (CRITICAL)
+          if [ -f "$TENANT_REPORT" ]; then
+            RLS_TESTED=$(cat "$TENANT_REPORT" | jq -r '.summary.rls_actually_tested // false')
+            ISOLATION_FAILED=$(cat "$TENANT_REPORT" | jq -r '.summary.failed // 0')
+
+            echo "Tenant isolation: RLS tested=$RLS_TESTED, failures=$ISOLATION_FAILED"
+
+            if [ "$RLS_TESTED" != "true" ]; then
+              echo "❌ CRITICAL: RLS was not actually verified!"
+              FAILED=1
+            fi
+
+            if [ "$ISOLATION_FAILED" -gt 0 ]; then
+              echo "❌ CRITICAL: Tenant isolation tests failed!"
+              FAILED=1
+            fi
+          else
+            echo "⚠️ No tenant isolation report found at $TENANT_REPORT"
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo "❌ Database validation failed"
+            exit 1
+          else
+            echo "✅ Database validation passed"
+          fi
+
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: database-validation
+    if: github.event.inputs.run_performance_tests != 'false'
+
+    env:
+      REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @supabase/supabase-js dotenv
+
+      - name: Run performance benchmarks
+        run: |
+          echo "Running database performance benchmarks..."
+          mkdir -p benchmark-results
+          node -e "
+            const DatabaseTestRunner = require('./scripts/testing/test-database-schema.js');
+            const runner = new DatabaseTestRunner({
+              environment: 'performance',
+              outputDir: './benchmark-results'
+            });
+            runner.runPerformanceBenchmarks().then(console.log);
+          "
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-benchmark-results
+          path: benchmark-results/
+          retention-days: 7
+
+  security-checks:
+    name: Security Validation
+    runs-on: ubuntu-latest
+    needs: database-validation
+
+    env:
+      REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @supabase/supabase-js dotenv
+
+      - name: Run security validation
+        run: |
+          echo "Running database security validation..."
+          mkdir -p security-results
+          node -e "
+            const DatabaseValidator = require('./scripts/validation/check_db_schema.js');
+            const validator = new DatabaseValidator();
+            validator.initialize().then(() => {
+              return validator.validateRowLevelSecurity();
+            }).then(console.log);
+          "
+
+      - name: Check for security vulnerabilities
+        run: |
+          echo "Checking for common database security issues..."
+          # Add custom security checks here
+          echo "Security check completed"
+
+  migration-validation:
+    name: Migration Validation
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'supabase/migrations/') || github.event_name == 'pull_request'
+
+    env:
+      REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @supabase/supabase-js dotenv
+
+      - name: Validate migration scripts
+        run: |
+          echo "Validating migration scripts..."
+          # Check for SQL syntax errors
+          for file in supabase/migrations/*.sql; do
+            if [ -f "$file" ]; then
+              echo "Validating $file..."
+              # Basic SQL syntax validation
+              if grep -q "DROP TABLE\|DELETE FROM\|TRUNCATE" "$file"; then
+                echo "⚠️  Warning: Destructive operations found in $file"
+              fi
+            fi
+          done
+
+      - name: Test migration functions
+        run: |
+          echo "Testing migration helper functions..."
+          node -e "
+            const DatabaseValidator = require('./scripts/validation/check_db_schema.js');
+            const validator = new DatabaseValidator();
+            validator.initialize().then(() => {
+              return validator.validateDataMigrations();
+            }).then(console.log);
+          "
+
+  notify-teams:
+    name: Notify Teams
+    runs-on: ubuntu-latest
+    needs: [database-validation, performance-benchmarks, security-checks]
+    if: failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging')
+
+    steps:
+      - name: Send Slack notification on failure
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: "#engineering-alerts"
+          text: |
+            🚨 Database validation failed on ${{ github.ref_name }}
+
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+            **Workflow:** ${{ github.workflow }}
+
+            Please check the failed tests and address any schema issues.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Create GitHub issue on repeated failures
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 Database Validation Failures';
+            const body = `
+            ## Database Validation Alert
+
+            Multiple database validation failures detected.
+
+            **Details:**
+            - Branch: ${{ github.ref_name }}
+            - Workflow: ${{ github.workflow }}
+            - Run ID: ${{ github.run_id }}
+
+            **Actions Required:**
+            1. Review failed test results
+            2. Check database schema integrity
+            3. Verify migration scripts
+            4. Test database connectivity
+
+            **Links:**
+            - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Schema Validation Documentation](./docs/DATABASE_VALIDATION.md)
+            `;
+
+            // Check if similar issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'database,validation,alert'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['database', 'validation', 'alert', 'bug']
+              });
+            }

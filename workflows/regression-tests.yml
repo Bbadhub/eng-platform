@@ -1,0 +1,246 @@
+# Regression Tests Workflow
+# Runs layered regression tests on PRs with test-impact analysis.
+#
+# Features:
+#   - Layer-based test execution (0-4)
+#   - Test impact analysis for selective runs
+#   - Parity tests triggered by label
+#   - Failure blocks merge
+
+name: Regression Tests
+
+on:
+  pull_request:
+    branches: [dev, staging, main]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+    inputs:
+      layer:
+        description: 'Test layer to run (0-4, or "all")'
+        required: false
+        type: string
+        default: "all"
+      tags:
+        description: "Test tags to filter (@happy-path, @edge-case, @parity)"
+        required: false
+        type: string
+        default: "@happy-path"
+
+env:
+  CI: true
+  PLAYWRIGHT_BROWSERS_PATH: 0
+
+jobs:
+  # Determine which tests to run based on changed files
+  analyze-impact:
+    name: Analyze Test Impact
+    runs-on: ubuntu-latest
+    outputs:
+      layers: ${{ steps.impact.outputs.layers }}
+      should_run: ${{ steps.impact.outputs.should_run }}
+      grep_filter: ${{ steps.impact.outputs.grep_filter }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Analyze changed files
+        id: impact
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual run - use specified layer
+            if [ "${{ inputs.layer }}" = "all" ]; then
+              echo "layers=[0,1,2,3,4]" >> $GITHUB_OUTPUT
+            else
+              echo "layers=[${{ inputs.layer }}]" >> $GITHUB_OUTPUT
+            fi
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "grep_filter=${{ inputs.tags }}" >> $GITHUB_OUTPUT
+          else
+            # Analyze PR/push changes
+            if [ -f "scripts/test-impact-analysis.js" ]; then
+              RESULT=$(node scripts/test-impact-analysis.js --base origin/main --ci 2>/dev/null || echo "layers=[];should_run=false")
+
+              # Parse result
+              LAYERS=$(echo "$RESULT" | grep -oP '(?<=layers=)\[.*?\]' || echo "[0,1,2,3,4]")
+              GREP=$(echo "$RESULT" | grep -oP '(?<=grep=).*' || echo "@happy-path")
+
+              echo "layers=$LAYERS" >> $GITHUB_OUTPUT
+              echo "grep_filter=$GREP" >> $GITHUB_OUTPUT
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            else
+              # Fallback: run all happy-path tests
+              echo "layers=[0,1,2,3,4]" >> $GITHUB_OUTPUT
+              echo "grep_filter=@happy-path" >> $GITHUB_OUTPUT
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  # Run regression tests
+  regression:
+    name: Regression Tests
+    needs: analyze-impact
+    if: needs.analyze-impact.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Start dev servers
+        run: |
+          node server.js &
+          npx wait-on http://localhost:3001/api/health -t 30000
+          PORT=3003 TSC_COMPILE_ON_ERROR=true DISABLE_ESLINT_PLUGIN=true npx craco start &
+          npx wait-on http://localhost:3003 -t 120000
+        env:
+          REACT_APP_CLERK_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_POSTHOG_KEY: ${{ secrets.REACT_APP_POSTHOG_KEY }}
+          POSTHOG_HOST: https://us.i.posthog.com
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      - name: Run Layer 0 (Foundation)
+        if: contains(needs.analyze-impact.outputs.layers, '0')
+        run: |
+          npx playwright test e2e/regression/layer-0-foundation/ \
+            --project=chromium \
+            --grep "${{ needs.analyze-impact.outputs.grep_filter }}" \
+            --reporter=list
+        continue-on-error: false
+
+      - name: Run Layer 1 (Core)
+        if: contains(needs.analyze-impact.outputs.layers, '1')
+        run: |
+          npx playwright test e2e/regression/layer-1-core/ \
+            --project=chromium \
+            --grep "${{ needs.analyze-impact.outputs.grep_filter }}" \
+            --reporter=list
+        continue-on-error: false
+
+      - name: Run Layer 2 (Data)
+        if: contains(needs.analyze-impact.outputs.layers, '2')
+        run: |
+          npx playwright test e2e/regression/layer-2-data/ \
+            --project=chromium \
+            --grep "${{ needs.analyze-impact.outputs.grep_filter }}" \
+            --reporter=list
+        continue-on-error: false
+
+      - name: Run Layer 3 (UI/UX)
+        if: contains(needs.analyze-impact.outputs.layers, '3')
+        run: |
+          npx playwright test e2e/regression/layer-3-ui/ \
+            --project=chromium \
+            --grep "${{ needs.analyze-impact.outputs.grep_filter }}" \
+            --reporter=list
+        continue-on-error: false
+
+      - name: Run Layer 4 (Business)
+        if: contains(needs.analyze-impact.outputs.layers, '4')
+        run: |
+          npx playwright test e2e/regression/layer-4-business/ \
+            --project=chromium \
+            --grep "${{ needs.analyze-impact.outputs.grep_filter }}" \
+            --reporter=list
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-test-results-${{ github.run_number }}
+          path: test-results/
+          retention-days: 7
+
+  # Run parity tests when label is present
+  parity-tests:
+    name: Parity Tests
+    if: contains(github.event.pull_request.labels.*.name, 'parity-check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Start dev servers
+        run: |
+          node server.js &
+          npx wait-on http://localhost:3001/api/health -t 30000
+          PORT=3003 TSC_COMPILE_ON_ERROR=true DISABLE_ESLINT_PLUGIN=true npx craco start &
+          npx wait-on http://localhost:3003 -t 120000
+        env:
+          REACT_APP_CLERK_PUBLISHABLE_KEY: ${{ secrets.REACT_APP_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_POSTHOG_KEY: ${{ secrets.REACT_APP_POSTHOG_KEY }}
+          POSTHOG_HOST: https://us.i.posthog.com
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      - name: Run parity tests
+        run: |
+          npx playwright test e2e/regression/ \
+            --project=chromium \
+            --grep "@parity" \
+            --reporter=list
+
+      - name: Upload parity results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-test-results-${{ github.run_number }}
+          path: test-results/
+          retention-days: 7
+
+  # Summary job for branch protection
+  regression-complete:
+    name: Regression Complete
+    needs: [regression]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.regression.result }}" = "failure" ]; then
+            echo "::error::Regression tests failed"
+            exit 1
+          fi
+          echo "All regression tests passed"

@@ -1,0 +1,174 @@
+# Nightly E2E Test Suite
+# Full E2E test suite across all browsers - runs nightly against staging
+#
+# Purpose:
+#   - Catch regressions before they accumulate
+#   - Verify cross-browser compatibility
+#   - Track test stability over time
+#
+# Schedule: 2:00 AM UTC daily (9 PM EST / 6 PM PST)
+
+name: Nightly E2E Suite
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # 2 AM UTC daily
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target URL (default: localhost)"
+        required: false
+        default: "http://localhost:3003"
+      browsers:
+        description: "Browsers to test (chromium,firefox,webkit,all)"
+        required: false
+        default: "all"
+
+env:
+  E2E_BASE_URL: ${{ github.event.inputs.target_url || 'http://localhost:3003' }}
+  REACT_APP_API_URL: http://localhost:3001
+
+jobs:
+  # Check if staging is healthy before running expensive tests
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    outputs:
+      healthy: ${{ steps.check.outputs.healthy }}
+    steps:
+      - name: Check staging health
+        id: check
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.E2E_BASE_URL }} || echo "000")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "healthy=true" >> $GITHUB_OUTPUT
+            echo "✅ Target is healthy"
+          else
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            echo "❌ Target returned HTTP $HTTP_STATUS"
+          fi
+
+  # Matrix build for cross-browser testing
+  e2e-tests:
+    name: E2E (${{ matrix.browser }})
+    needs: health-check
+    if: needs.health-check.outputs.healthy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false # Don't cancel other browsers if one fails
+      matrix:
+        browser: [chromium, firefox, webkit]
+        # Skip browsers based on input (scheduled runs test all browsers)
+        exclude:
+          - browser: ${{ github.event.inputs.browsers && github.event.inputs.browsers != 'all' && github.event.inputs.browsers != 'firefox' && 'firefox' || 'never-exclude' }}
+          - browser: ${{ github.event.inputs.browsers && github.event.inputs.browsers != 'all' && github.event.inputs.browsers != 'webkit' && 'webkit' || 'never-exclude' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run E2E tests
+        run: |
+          npx playwright test \
+            --project=${{ matrix.browser }} \
+            --workers=2 \
+            --retries=2
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.browser }}
+          path: test-results/e2e-junit.xml
+          retention-days: 7
+
+  # Aggregate results and notify
+  report:
+    name: Report Results
+    needs: e2e-tests
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all JUnit reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: junit-*
+          merge-multiple: true
+
+      - name: Publish JUnit Report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: "**/e2e-junit.xml"
+          fail_on_failure: false # Nightly shouldn't block anything
+          summary: true
+          check_name: "Nightly E2E Results"
+
+      - name: Summary
+        run: |
+          echo "## Nightly E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target:** ${{ env.E2E_BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Browser | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Chromium | ${{ needs.e2e-tests.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Firefox | ${{ needs.e2e-tests.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| WebKit | ${{ needs.e2e-tests.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View artifacts for detailed reports and screenshots." >> $GITHUB_STEP_SUMMARY
+
+  # Notify on failures (optional - uncomment if Slack webhook configured)
+  # notify-failure:
+  #   name: Notify Failure
+  #   needs: e2e-tests
+  #   if: failure()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Send Slack notification
+  #       uses: slackapi/slack-github-action@v1
+  #       with:
+  #         payload: |
+  #           {
+  #             "text": "🚨 Nightly E2E tests failed!",
+  #             "blocks": [
+  #               {
+  #                 "type": "section",
+  #                 "text": {
+  #                   "type": "mrkdwn",
+  #                   "text": "*Nightly E2E tests failed*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Results>"
+  #                 }
+  #               }
+  #             ]
+  #           }
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

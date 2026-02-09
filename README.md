@@ -1,9 +1,9 @@
-# Engineering Platform v0.2.0
+# Engineering Platform v1.0.0
 
 > Unified engineering standards, tools, and templates for all projects.
 
-**Status:** Alpha - LegalAI configs + Custom MCP servers
-**Next:** Add Repo #2 audit → Consolidate to v1.0.0
+**Status:** Production - Consolidated LegalAI + AdHub innovations
+**Next:** v0.3.0 - eng-platform-mcp meta server
 
 ---
 
@@ -59,9 +59,20 @@ echo 'module.exports = require("./eng-platform/configs/eslint/react")' > .eslint
 ```
 eng-platform/
 ├── audits/                  # Historical audit results
-│   └── legalai-system/      # Phase 1-3 audit outputs
-├── configs/                 # Shared ESLint, Prettier, TS configs
-├── templates/               # PR templates, CLAUDE.md, CI workflows
+│   ├── legalai-system/      # Phase 1-3 audit outputs
+│   └── adhub/               # AdHub audit + ADRs
+├── configs/                 # Shared configs
+│   ├── commitlint/          # Conventional commits enforcement
+│   ├── husky/               # Git hooks
+│   └── playwright-reporters/ # Custom Playwright reporters
+├── templates/               # Templates and hooks
+│   ├── protection-guard-hook/ # PreToolUse hook for code protection
+│   └── github/              # PR templates, CI workflows
+├── skills/                  # ÆtherLight Skills (8 domain-agnostic skills)
+│   ├── code-analyze/        # Pattern analysis
+│   ├── protect/             # Code protection annotation
+│   ├── protection-audit/    # Protection compliance
+│   └── ...                 # + 5 more
 ├── mcp-servers/             # Custom-built MCP servers (9 servers)
 │   ├── research-swarm/      # ARE/QRE research engine
 │   ├── basin-analyzer/      # Context drift detection
@@ -71,6 +82,14 @@ eng-platform/
 │   └── ...                 # + 4 more
 ├── mcp/                     # MCP marketplace curation
 ├── scripts/                 # Automation tools
+│   ├── test-determinism-gate.js # Anti-hallucination tests
+│   ├── team-sync-check.js   # Environment validation
+│   ├── setup-posthog-flags.js # Feature flag management
+│   └── metrics/             # DORA metrics collection
+├── workflows/               # CI/CD workflows (5 workflows)
+│   ├── nightly-e2e.yml      # Cross-browser E2E tests
+│   ├── regression-tests.yml # 5-layer regression
+│   └── ...                 # + 3 more
 └── docs/                    # Process documentation
 ```
 
@@ -121,6 +140,20 @@ eng-platform/
 
 ## 📊 Version History
 
+### v1.0.0 (2026-02-09) - AdHub Consolidation
+- **11 AdHub innovations** integrated and cleaned for domain-agnostic use
+- **Protection Guard Hook** - Automatic code protection enforcement via PreToolUse
+- **ÆtherLight Skills (8 skills)** - AI-native workflow automation
+- **Determinism Gate** - Anti-hallucination test detection
+- **DORA Metrics** - Engineering velocity tracking
+- **5-Layer Regression Testing** - Dependency-based test organization
+- **PostHog Feature Flags** - Dependency graph architecture
+- **commitlint Enforcement** - 100% conventional commits
+- **Team Sync Check** - Environment validation
+- **5 CI/CD Workflows** - E2E, regression, drift detection, metrics, database validation
+- **Playwright Reporters** - PostHog + feedback integration
+- **3 ADRs** - Vitest migration, Protection Guard, REST vs tRPC (case studies)
+
 ### v0.2.0 (2026-02-08) - Custom MCP Servers
 - **9 domain-agnostic MCP servers** extracted from LegalAI
 - **research-swarm** - ARE/QRE research engine with formula scoring
@@ -137,12 +170,6 @@ eng-platform/
 - MCP marketplace curation (Tier 1: 5 servers)
 - Audit & compliance scripts
 
-### Coming in v1.0.0
-- Repo #2 audit integration
-- Consolidated patterns from both repos
-- ADRs documenting conflict resolutions
-- Tested on both repos
-
 ---
 
 ## 🚀 Roadmap
@@ -151,17 +178,17 @@ eng-platform/
 - [x] Generate v0.1.0 from LegalAI audit
 - [x] Extract custom MCP servers → v0.2.0
 - [x] Document bidirectional sync strategies
+- [x] Phase 1-3: Audit AdHub (Repo #2)
+- [x] **v1.0.0:** Consolidate LegalAI + AdHub innovations
+- [x] Clean all files for domain-agnostic use
+- [x] ADRs documenting real-world decisions
 - [ ] **v0.3.0:** Build eng-platform-mcp (meta MCP server)
 - [ ] **v0.4.0:** Publish configs as npm packages
 - [ ] **v0.5.0:** Publish MCP servers as npm packages
-- [ ] Phase 1-3: Audit Repo #2
-- [ ] **v1.0.0:** Consolidate + ADRs + Full automation
 - [ ] **v2.0.0:** Self-organizing platform + Monorepo
-- [ ] Consolidate findings → v1.0.0
-- [ ] Apply to both repos
 - [ ] Quarterly MCP reviews
-- [ ] Publish MCP servers as standalone packages
-- [ ] Publish configs as npm packages
+- [ ] Apply to both repos (validation)
+- [ ] Migration scripts for existing projects
 
 ---
 

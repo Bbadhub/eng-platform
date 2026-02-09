@@ -1,0 +1,14 @@
+{
+  "!(e2e|scripts|.claude)/**/*.{ts,tsx}": [
+    "eslint --fix --max-warnings=0",
+    "prettier --write"
+  ],
+  "!(e2e|scripts|.claude)/**/*.{js,jsx}": [
+    "eslint --fix --max-warnings=0",
+    "prettier --write"
+  ],
+  "e2e/**/*.{ts,tsx}": ["prettier --write"],
+  "scripts/**/*.js": ["prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write"],
+  "*.py": ["python -m black", "python -m flake8 --max-line-length=120"]
+}

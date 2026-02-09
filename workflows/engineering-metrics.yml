@@ -1,0 +1,215 @@
+# Engineering Metrics Workflow
+# Collects DORA metrics and engineering velocity data from git history.
+#
+# Schedule:
+#   - Daily at 6 AM UTC (midnight Central): Collect metrics, commit report
+#   - Weekly on Monday at 8 AM UTC (2 AM Central): Create GitHub issue digest
+#
+# Manual trigger: gh workflow run engineering-metrics.yml
+
+name: Engineering Metrics
+
+on:
+  schedule:
+    # Daily at 6 AM UTC (midnight Central)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      weeks:
+        description: "Number of weeks to analyze"
+        required: false
+        default: "4"
+        type: string
+      create_issue:
+        description: "Create GitHub issue with report"
+        required: false
+        default: "true"
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+env:
+  NODE_ENV: production
+
+jobs:
+  collect-metrics:
+    name: Collect Engineering Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect metrics
+        id: metrics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          METRICS_WEEKS: ${{ github.event.inputs.weeks || '4' }}
+        run: |
+          node scripts/metrics/engineering-velocity.js \
+            --weeks=$METRICS_WEEKS \
+            --output-dir=./docs/metrics
+
+          DATE=$(date +%Y-%m-%d)
+          echo "report_date=$DATE" >> $GITHUB_OUTPUT
+
+          # Extract DORA values for summary
+          JSON_FILE="docs/metrics/velocity-${DATE}.json"
+          if [ -f "$JSON_FILE" ]; then
+            DF_AVG=$(cat "$JSON_FILE" | jq -r '.dora.deploymentFrequency.average // "N/A"')
+            DF_RATING=$(cat "$JSON_FILE" | jq -r '.dora.deploymentFrequency.rating // "N/A"')
+            LT_MED=$(cat "$JSON_FILE" | jq -r '.dora.leadTime.medianHours // "N/A"')
+            LT_RATING=$(cat "$JSON_FILE" | jq -r '.dora.leadTime.rating // "N/A"')
+            CFR=$(cat "$JSON_FILE" | jq -r '.dora.changeFailureRate.percentage // "N/A"')
+            CFR_RATING=$(cat "$JSON_FILE" | jq -r '.dora.changeFailureRate.rating // "N/A"')
+            MTTR_MED=$(cat "$JSON_FILE" | jq -r '.dora.mttr.medianHours // "N/A"')
+            MTTR_RATING=$(cat "$JSON_FILE" | jq -r '.dora.mttr.rating // "N/A"')
+            echo "df_avg=$DF_AVG" >> $GITHUB_OUTPUT
+            echo "df_rating=$DF_RATING" >> $GITHUB_OUTPUT
+            echo "lt_med=$LT_MED" >> $GITHUB_OUTPUT
+            echo "lt_rating=$LT_RATING" >> $GITHUB_OUTPUT
+            echo "cfr=$CFR" >> $GITHUB_OUTPUT
+            echo "cfr_rating=$CFR_RATING" >> $GITHUB_OUTPUT
+            echo "mttr_med=$MTTR_MED" >> $GITHUB_OUTPUT
+            echo "mttr_rating=$MTTR_RATING" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/metrics/
+          git diff --cached --quiet || git commit -m "docs(metrics): engineering velocity report $(date +%Y-%m-%d)"
+          git push
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engineering-metrics-${{ steps.metrics.outputs.report_date }}
+          path: docs/metrics/
+          retention-days: 90
+
+      # Create GitHub issue on Mondays or manual trigger with create_issue=true
+      - name: Create weekly digest issue
+        if: >-
+          github.event.inputs.create_issue == 'true' ||
+          github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const date = '${{ steps.metrics.outputs.report_date }}';
+            const dayOfWeek = new Date().getUTCDay();
+
+            // Only create issue on Monday (day 1) for scheduled runs, or always for manual
+            const isManual = '${{ github.event_name }}' === 'workflow_dispatch';
+            if (!isManual && dayOfWeek !== 1) {
+              console.log('Not Monday, skipping issue creation');
+              return;
+            }
+
+            const mdPath = `docs/metrics/velocity-${date}.md`;
+            let body = 'See workflow artifacts for full report.';
+            if (fs.existsSync(mdPath)) {
+              body = fs.readFileSync(mdPath, 'utf8');
+            }
+
+            // Close previous report issues
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'engineering-metrics',
+              per_page: 10,
+            });
+            for (const issue of existing.data) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }
+
+            // Create new issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Engineering Metrics Report - Week of ${date}`,
+              body: body,
+              labels: ['engineering-metrics', 'automated'],
+            });
+
+            console.log(`Created issue: Engineering Metrics Report - Week of ${date}`);
+
+      - name: Post to Slack
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \"Engineering Metrics - ${{ steps.metrics.outputs.report_date }}\"
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"*DORA Metrics:*\n- Deploy Frequency: ${{ steps.metrics.outputs.df_avg }}/week (${{ steps.metrics.outputs.df_rating }})\n- Lead Time: ${{ steps.metrics.outputs.lt_med }}h (${{ steps.metrics.outputs.lt_rating }})\n- Change Failure Rate: ${{ steps.metrics.outputs.cfr }}% (${{ steps.metrics.outputs.cfr_rating }})\n- MTTR: ${{ steps.metrics.outputs.mttr_med }}h (${{ steps.metrics.outputs.mttr_rating }})\"
+                  }
+                },
+                {
+                  \"type\": \"actions\",
+                  \"elements\": [
+                    {
+                      \"type\": \"button\",
+                      \"text\": {\"type\": \"plain_text\", \"text\": \"View Full Report\"},
+                      \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$SLACK_WEBHOOK_URL"
+
+      - name: Write step summary
+        if: always()
+        run: |
+          echo "## Engineering Metrics - ${{ steps.metrics.outputs.report_date }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### DORA Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value | Rating |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployment Frequency | ${{ steps.metrics.outputs.df_avg }}/week | ${{ steps.metrics.outputs.df_rating }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lead Time (median) | ${{ steps.metrics.outputs.lt_med }}h | ${{ steps.metrics.outputs.lt_rating }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Change Failure Rate | ${{ steps.metrics.outputs.cfr }}% | ${{ steps.metrics.outputs.cfr_rating }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| MTTR (median) | ${{ steps.metrics.outputs.mttr_med }}h | ${{ steps.metrics.outputs.mttr_rating }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          DATE="${{ steps.metrics.outputs.report_date }}"
+          if [ -f "docs/metrics/velocity-${DATE}.md" ]; then
+            echo "### Full Report" >> $GITHUB_STEP_SUMMARY
+            cat "docs/metrics/velocity-${DATE}.md" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,154 @@
+# ÆtherLight Sprint File
+# CRITICAL: Each task must include "prompt" field with full implementation context
+
+sprint_name = "Getting Started with ÆtherLight"
+start_date = "2026-02-09"
+end_date = "2026-02-16"
+
+[tasks.SETUP-001]
+id = "SETUP-001"
+name = "Explore ÆtherLight Voice Panel"
+prompt = """
+DESIGN DECISION: Familiarize user with Voice Panel as central ÆtherLight interface
+WHY: Voice Panel is the main UI for all features - must understand it first
+
+REASONING CHAIN:
+1. User just installed ÆtherLight extension
+2. Need to understand what features are available before using them
+3. Voice Panel contains 6 tabs (Voice, Sprint, Chat, History, Patterns, Settings)
+4. Sprint Tab shows this task list (meta: task displaying itself)
+5. Exploration → Understanding → Effective usage
+
+Context (CRITICAL - Include all of these):
+- This is your first time using ÆtherLight
+- Voice Panel is the main UI for all ÆtherLight features
+- Sprint Tab reads from sprints/ACTIVE_SPRINT.toml (this file)
+- Backtick hotkey is fastest way to access ÆtherLight
+
+Steps:
+1. Press backtick (`) key to open Voice Panel in VS Code sidebar
+2. Explore each tab: Voice, Sprint, Chat, History, Patterns, Settings
+3. Click on Sprint Tab to see this task list
+4. Verify Voice Panel opens and displays correctly
+
+Success criteria:
+- Voice Panel opens when backtick pressed
+- All 6 tabs are visible and clickable
+- Sprint Tab shows this task (SETUP-001) ← You're looking at this right now!
+- No console errors in VS Code Developer Tools
+
+PATTERN: Pattern-ONBOARDING-001 (Guided exploration of new interface)
+"""
+status = "pending"
+priority = "high"
+estimated_hours = 0.5
+dependencies = []
+
+[tasks.SETUP-002]
+id = "SETUP-002"
+name = "Create Your First Real Task"
+prompt = """
+DESIGN DECISION: Learn by doing - create a task that solves a real problem in your project
+WHY: Example tasks are fine for learning, but real value comes from using ÆtherLight on actual work
+
+REASONING CHAIN:
+1. You've explored Voice Panel and understand the interface
+2. You've seen what a good task prompt looks like (SETUP-001)
+3. Now apply that knowledge to your own project
+4. Create a task with detailed prompt following the template
+5. Let Claude execute it to see ÆtherLight in action
+
+Context (CRITICAL):
+- You now understand how tasks work in ACTIVE_SPRINT.toml
+- Each task needs: id, name, prompt (with full context), status, priority, estimated_hours
+- Prompts should include: tech stack, file paths, steps, success criteria
+- Sprint Tab will show your new task once you save this file
+
+Steps:
+1. Think of a real task in your project (feature, bug fix, refactor)
+2. Open sprints/ACTIVE_SPRINT.toml in editor
+3. Add a new [tasks.YOUR-ID] section below SETUP-002
+4. Write a detailed prompt following SETUP-001 example
+5. Include: Context, Steps, Success criteria, Tech stack
+6. Save file and refresh Sprint Tab to see it
+
+Success criteria:
+- New task appears in Sprint Tab
+- Prompt includes all required context
+- Task is specific enough that Claude could execute it without questions
+- You feel confident the prompt has everything needed
+
+Example task structure:
+[tasks.FEAT-001]
+id = "FEAT-001"
+name = "Your task name here"
+prompt = """
+[Your detailed prompt here with context, steps, success criteria]
+"""
+status = "pending"
+priority = "medium"
+estimated_hours = 2.0
+dependencies = []
+
+PATTERN: Pattern-SPRINT-001 (Task-based development workflow)
+"""
+status = "pending"
+priority = "medium"
+estimated_hours = 1.0
+dependencies = ["SETUP-001"]
+
+[tasks.SETUP-003]
+id = "SETUP-003"
+name = "Test Voice Capture (Optional)"
+prompt = """
+DESIGN DECISION: Optional voice testing - requires desktop app
+WHY: Voice capture is powerful but requires separate desktop app install
+
+REASONING CHAIN:
+1. ÆtherLight supports voice input via Ctrl+` hotkey
+2. Requires desktop app running in background (not installed by default)
+3. If no desktop app: Skip this task, all other features work fine
+4. If desktop app installed: Test voice capture to speed up workflow
+
+Context (CRITICAL):
+- Desktop app: Separate download from GitHub releases
+- Runs in system tray (Mac/Windows)
+- Uses OpenAI Whisper for transcription
+- Hotkey: Ctrl+` (Control + backtick)
+- Works with or without desktop app (voice is optional)
+
+Steps (if desktop app installed):
+1. Verify desktop app is running (check system tray)
+2. Open Voice Panel (backtick key)
+3. Click Voice Tab
+4. Press Ctrl+` to start recording
+5. Speak: "Create a function to validate email addresses"
+6. Press Ctrl+` to stop recording
+7. Wait for transcription to appear
+8. Verify transcription is accurate
+
+Steps (if NO desktop app):
+1. Skip this task
+2. ÆtherLight works perfectly without voice capture
+3. Use Sprint Tab, typing in Chat Tab, all other features
+4. Desktop app optional (for voice convenience)
+
+Success criteria (if testing voice):
+- Ctrl+` starts recording
+- Microphone picks up voice
+- Transcription appears in Voice Tab
+- Transcription is accurate
+- Can copy transcription to use as prompt
+
+Success criteria (if skipping):
+- Understand voice is optional
+- Know how to install desktop app if wanted later
+- Confident using ÆtherLight without voice
+
+PATTERN: Pattern-VOICE-001 (Voice-to-text workflow)
+RELATED: Desktop app installation guide (GitHub releases)
+"""
+status = "pending"
+priority = "low"
+estimated_hours = 0.5
+dependencies = ["SETUP-001"]

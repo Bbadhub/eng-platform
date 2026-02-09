@@ -1,0 +1,7 @@
+# Check for protected file modifications (warning only)
+if [ -z "$SKIP_PROTECTION_CHECK" ]; then
+  node scripts/check-protected-files.js --quiet 2>/dev/null || true
+fi
+
+# Run lint-staged
+npx lint-staged
