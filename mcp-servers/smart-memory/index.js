@@ -19,13 +19,13 @@ const MEMORY_FILE = process.env.MEMORY_FILE_PATH ||
 
 import { execSync } from 'child_process';
 
-// Project namespace mapping based on git remote URLs
-const GIT_REPO_MAP = {
-  'github.com/user/LegalAI_System': 'legalai',
-  'github.com/user/AdHub': 'adhub',
-  'github.com/user/eng-platform': 'eng-platform',
-  // Add more mappings as needed
-};
+// Load configuration
+const config = JSON.parse(
+  await fs.readFile(path.join(__dirname, 'config.json'), 'utf8')
+);
+
+// Project namespace mapping from config
+const GIT_REPO_MAP = config.git_repo_mapping;
 
 /**
  * Get git user info (for attribution)
