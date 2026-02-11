@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "lastUpdated": "2026-02-09",
+  "version": "1.1.0",
+  "lastUpdated": "2026-02-11",
   "description": "Comprehensive registry of development tools and processes for experimentation and standardization",
 
   "categories": {
@@ -265,6 +265,74 @@
       ]
     },
 
+    "qa_testing": {
+      "description": "QA testing infrastructure, manual/automated test coordination, and test result management",
+      "options": [
+        {
+          "id": "ralph-loop",
+          "name": "Ralph Loop",
+          "package": null,
+          "version": null,
+          "description": "Automated failure ingestion pipeline: Playwright failures → Supabase → GitHub Issues with dedup + adaptive MCP triggers",
+          "status": "standard",
+          "introduced": "2026-02-10"
+        },
+        {
+          "id": "test-claim-system",
+          "name": "Test Claim System",
+          "package": null,
+          "version": null,
+          "description": "REST API for QA coordination: claim/heartbeat/release tests to prevent conflicts between testers",
+          "status": "standard",
+          "introduced": "2026-02-11"
+        },
+        {
+          "id": "manual-test-runner",
+          "name": "Manual Test Runner (HTML)",
+          "package": null,
+          "version": null,
+          "description": "Browser-based manual test execution with API integration, claim system, and result submission to unified pipeline",
+          "status": "standard",
+          "introduced": "2026-02-11"
+        },
+        {
+          "id": "coverage-matrix",
+          "name": "Coverage Matrix Generator",
+          "package": null,
+          "version": null,
+          "description": "Keyword-matching engine mapping manual tests to E2E specs, outputs JSON + HTML coverage reports",
+          "status": "standard",
+          "introduced": "2026-02-11"
+        },
+        {
+          "id": "flake-registry",
+          "name": "Flake Registry + Budget Tracker",
+          "package": null,
+          "version": null,
+          "description": "JSON-based flake tracking with MCP budget enforcement ($0.05/day cap) and adaptive failure classification",
+          "status": "standard",
+          "introduced": "2026-02-11"
+        },
+        {
+          "id": "unified-results-dashboard",
+          "name": "Unified Test Results Dashboard",
+          "package": null,
+          "version": null,
+          "description": "React component (TestResults.tsx) showing Playwright + Manual results in one table with status/type filters",
+          "status": "standard",
+          "introduced": "2026-02-11"
+        }
+      ],
+      "tracked_metrics": [
+        "flake_rate",
+        "manual_test_coverage_percent",
+        "duplicate_report_rate",
+        "github_issue_noise_per_day",
+        "mcp_daily_cost_usd",
+        "test_claim_utilization"
+      ]
+    },
+
     "task_management": {
       "description": "Issue tracking and task management for AI workflows",
       "options": [
@@ -361,6 +429,42 @@
       "range": [0, null],
       "source": "DORA metrics",
       "description": "Hours from commit to production (DORA metric)"
+    },
+    "flake_rate": {
+      "type": "numeric",
+      "range": [0, 100],
+      "source": "flake-registry.json + coverage-gaps.json",
+      "description": "Percentage of E2E tests with >10% flake rate"
+    },
+    "manual_test_coverage_percent": {
+      "type": "numeric",
+      "range": [0, 100],
+      "source": "coverage-gaps.json",
+      "description": "Percentage of manual tests with E2E coverage (keyword matching)"
+    },
+    "duplicate_report_rate": {
+      "type": "numeric",
+      "range": [0, 100],
+      "source": "Supabase ralph_loop_events",
+      "description": "Percentage of duplicate failure reports in pipeline"
+    },
+    "github_issue_noise_per_day": {
+      "type": "numeric",
+      "range": [0, null],
+      "source": "gh issue list --label ralph-loop",
+      "description": "Daily GitHub issue creation rate from test failures"
+    },
+    "mcp_daily_cost_usd": {
+      "type": "numeric",
+      "range": [0, null],
+      "source": "mcp-budget-tracker.js getDailySpend()",
+      "description": "Daily MCP API cost in USD (budget cap: $0.05)"
+    },
+    "test_claim_utilization": {
+      "type": "numeric",
+      "range": [0, 1],
+      "source": "Supabase test_claims table",
+      "description": "Ratio of claimed tests to total active manual tests"
     }
   },
 
