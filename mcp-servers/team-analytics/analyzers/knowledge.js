@@ -16,9 +16,11 @@ export class KnowledgeAnalyzer {
     cutoffDate.setDate(cutoffDate.getDate() - timeframe);
 
     // Filter observations by engineer and timeframe
+    // Check both 'observer' (team-memory.json format) and 'author' (legacy format)
     const engineerObservations = memory.observations.filter(obs => {
-      const obsDate = new Date(obs.timestamp);
-      return obs.author === engineerName && obsDate >= cutoffDate;
+      const obsDate = new Date(obs.observedAt || obs.timestamp);
+      const obsAuthor = obs.observer || obs.author;
+      return obsAuthor === engineerName && obsDate >= cutoffDate;
     });
 
     // Calculate metrics
@@ -74,12 +76,12 @@ export class KnowledgeAnalyzer {
     // Count how many times this engineer's content appears in other contexts
     // Simplified: count observations that mention their patterns
     const engineerContent = memory.observations
-      .filter(o => o.author === engineerName)
+      .filter(o => (o.observer || o.author) === engineerName)
       .map(o => o.content.toLowerCase());
 
     let references = 0;
     for (const obs of memory.observations) {
-      if (obs.author !== engineerName) {
+      if ((obs.observer || obs.author) !== engineerName) {
         for (const content of engineerContent) {
           // Check if other observations reference this content (partial match)
           const contentWords = content.split(' ').filter(w => w.length > 4);
@@ -102,13 +104,13 @@ export class KnowledgeAnalyzer {
     const midpoint = new Date(now.getTime() - (timeframe * 24 * 60 * 60 * 1000) / 2);
 
     const recentObs = memory.observations.filter(o => {
-      const obsDate = new Date(o.timestamp);
-      return o.author === engineerName && obsDate >= midpoint;
+      const obsDate = new Date(o.observedAt || o.timestamp);
+      return (o.observer || o.author) === engineerName && obsDate >= midpoint;
     }).length;
 
     const olderObs = memory.observations.filter(o => {
-      const obsDate = new Date(o.timestamp);
-      return o.author === engineerName &&
+      const obsDate = new Date(o.observedAt || o.timestamp);
+      return (o.observer || o.author) === engineerName &&
              obsDate < midpoint &&
              obsDate >= new Date(now.getTime() - timeframe * 24 * 60 * 60 * 1000);
     }).length;

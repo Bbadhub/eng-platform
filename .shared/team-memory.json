@@ -1,36 +1,210 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-02-09T09:15:17.608Z",
+  "last_updated": "2026-02-11T12:00:00.000Z",
   "entities": {
-    "legalai_trpc_routers": {
-      "entityType": "code_location",
-      "observations": [
-        "trpc_router_location"
-      ],
-      "context": "legalai",
+    "adhub_pulse_dashboard": {
+      "entityType": "feature",
+      "observations": ["pulse_architecture", "pulse_testing_card"],
+      "context": "adhub",
       "createdBy": "Brett",
-      "createdAt": "2026-02-09T09:15:17.606Z"
+      "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    "token_economy": {
+      "entityType": "feature",
+      "observations": ["token_service_design", "token_hooks"],
+      "context": "adhub",
+      "createdBy": "Brett",
+      "createdAt": "2026-01-15T00:00:00.000Z"
+    },
+    "identity_resolution": {
+      "entityType": "feature",
+      "observations": ["identity_snowflake_writeback", "identity_hash_lookup"],
+      "context": "adhub",
+      "createdBy": "f9sam",
+      "createdAt": "2026-02-05T00:00:00.000Z"
+    },
+    "campaign_builder": {
+      "entityType": "feature",
+      "observations": ["campaign_types_api", "e2e_test_strategy"],
+      "context": "adhub",
+      "createdBy": "Angelo Solis",
+      "createdAt": "2026-01-20T00:00:00.000Z"
+    },
+    "qa_testing_system": {
+      "entityType": "feature",
+      "observations": ["ralph_loop_design", "flake_infrastructure"],
+      "context": "adhub",
+      "createdBy": "Brett",
+      "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    "ui_ux_system": {
+      "entityType": "feature",
+      "observations": ["setup_guide_redesign", "header_nav_cleanup"],
+      "context": "adhub",
+      "createdBy": "Ariel Ganzon",
+      "createdAt": "2026-02-01T00:00:00.000Z"
+    },
+    "deployment_infra": {
+      "entityType": "infrastructure",
+      "observations": ["render_deployment_fixes"],
+      "context": "adhub",
+      "createdBy": "ferret9",
+      "createdAt": "2026-01-25T00:00:00.000Z"
     }
   },
   "relations": [
     {
-      "from": "legalai_trpc_routers",
-      "to": "legalai_system",
-      "relationType": "part_of",
-      "context": "legalai",
-      "createdAt": "2026-02-09T09:15:17.608Z"
+      "from": "adhub_pulse_dashboard",
+      "to": "token_economy",
+      "relationType": "depends_on",
+      "context": "adhub",
+      "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    {
+      "from": "qa_testing_system",
+      "to": "campaign_builder",
+      "relationType": "validates",
+      "context": "adhub",
+      "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    {
+      "from": "identity_resolution",
+      "to": "campaign_builder",
+      "relationType": "enables",
+      "context": "adhub",
+      "createdAt": "2026-02-05T00:00:00.000Z"
     }
   ],
   "observations": [
     {
-      "id": "trpc_router_location",
-      "entityName": "legalai_trpc_routers",
-      "content": "tRPC routers are located in legalai-browser/src/server/routers/ directory. Key routers include: actors.ts (60KB, actor CRUD), validations.ts (triage queue), theories.ts (theory/claim CRUD), counts.ts (criminal counts), snippets.ts (evidence snippets), system.ts (MCP proxy).",
-      "observedAt": "2026-02-09T09:15:17.608Z",
+      "id": "pulse_architecture",
+      "entityName": "adhub_pulse_dashboard",
+      "content": "ADHUB Pulse dashboard provides executive overview with revenue streams, customer funnel, product health, and alert panels. Routes under /admin/pulse/* with SystemAdmin access. API endpoints serve aggregated metrics from Supabase with PostHog integration for real-time user behavior.",
+      "observedAt": "2026-02-10T00:00:00.000Z",
+      "observer": "Brett",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "pulse_testing_card",
+      "entityName": "adhub_pulse_dashboard",
+      "content": "Added testing metrics card to Pulse dashboard showing flake rate, test coverage, and recent failures. Integrates with product health endpoint via /api/testing/health. Sprint 21 deliverable.",
+      "observedAt": "2026-02-10T00:00:00.000Z",
       "observer": "Brett",
       "confidence": 1,
       "scope": "project",
-      "context": "legalai"
+      "context": "adhub"
+    },
+    {
+      "id": "token_service_design",
+      "entityName": "token_economy",
+      "content": "Token economy uses dual model: tokens for compute/storage credits (allocated monthly by tier), cash via Stripe for marketplace revenue. tokenService.ts (774 lines) handles balance checks, deductions, and ledger entries. Cost formula: totalCost = (recordCount * sumOfFieldCosts) + computeTokens.",
+      "observedAt": "2026-01-15T00:00:00.000Z",
+      "observer": "Brett",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "token_hooks",
+      "entityName": "token_economy",
+      "content": "Token balance display and deduction hooks implemented in React. useFeatureFlag guards all token endpoints. PostHog flags FF_TOKEN_ECONOMY_ENABLED and FF_TOKEN_DEDUCTION control rollout. 9 E2E tests covering auth session, balance API, cost estimation, and flag UI.",
+      "observedAt": "2026-02-01T00:00:00.000Z",
+      "observer": "Ariel Ganzon",
+      "confidence": 0.9,
+      "scope": "project",
+      "context": "adhub"
+    },
+    {
+      "id": "identity_snowflake_writeback",
+      "entityName": "identity_resolution",
+      "content": "Identity resolution write-back to Snowflake implemented in workflow routes. Hash waterfall strategy: phone_hash (confidence 1.0) > email_hash (0.8) > identity_hash (composite: fname[3]+lname[3]+addr[5]+zip, 0.6). Integrated into workflow builder step flow.",
+      "observedAt": "2026-02-08T00:00:00.000Z",
+      "observer": "f9sam",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "identity_hash_lookup",
+      "entityName": "identity_resolution",
+      "content": "Identity hash lookup integrated into workflow builder. Uses identityResolutionService.ts (814 lines) for person-level resolution. Always JOIN B2B_SIGNALS/B2C_SIGNALS/BEHAVIORS with their _REF tables on TOPIC_ID/IAB.",
+      "observedAt": "2026-02-05T00:00:00.000Z",
+      "observer": "f9sam",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "campaign_types_api",
+      "entityName": "campaign_builder",
+      "content": "Campaign type API endpoints built for multiple campaign formats. SimpleCampaignWizard.tsx is the primary builder component (HANDS OFF - dedicated engineer). Campaign builder integrates with workflow phases: Build, Target, Refine, Export.",
+      "observedAt": "2026-01-20T00:00:00.000Z",
+      "observer": "Angelo Solis",
+      "confidence": 1,
+      "scope": "project",
+      "context": "adhub"
+    },
+    {
+      "id": "e2e_test_strategy",
+      "entityName": "campaign_builder",
+      "content": "Comprehensive E2E test strategy using Playwright with persona-based testing. Tests cover data-upload flows, Clerk authentication (two-step login), and campaign creation. Fixed Clerk org creation step handling and form button selectors (.cl-formButtonPrimary).",
+      "observedAt": "2026-02-11T00:00:00.000Z",
+      "observer": "Angelo Solis",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "ralph_loop_design",
+      "entityName": "qa_testing_system",
+      "content": "Ralph Loop is the unified failure ingestion pipeline: Playwright test failures are ingested via API, classified by failure-classifier.js (adaptive MCP triggers), deduplicated, and auto-create GitHub Issues. Manual test failures from HTML test runner also flow through same pipeline. Budget tracker enforces $0.05/day MCP cost cap.",
+      "observedAt": "2026-02-10T00:00:00.000Z",
+      "observer": "Brett",
+      "confidence": 1,
+      "scope": "org",
+      "context": "adhub"
+    },
+    {
+      "id": "flake_infrastructure",
+      "entityName": "qa_testing_system",
+      "content": "Flake quarantine enabled in playwright.config.ts. Sprint 21 reduced flake rate from 20% to ~8%. Test claim system (api/testing/claim.js) prevents QA conflicts. Coverage matrix generator shows 73% coverage (42/57 manual tests). Unified results view in TestResults.tsx.",
+      "observedAt": "2026-02-11T00:00:00.000Z",
+      "observer": "Brett",
+      "confidence": 1,
+      "scope": "project",
+      "context": "adhub"
+    },
+    {
+      "id": "setup_guide_redesign",
+      "entityName": "ui_ux_system",
+      "content": "SetupGuide component enhanced with edge-minimized design and hover interactions for onboarding checklist. Improved visual clarity for new users. Uses Tailwind for styling with progressive disclosure pattern.",
+      "observedAt": "2026-02-03T00:00:00.000Z",
+      "observer": "Ariel Ganzon",
+      "confidence": 0.9,
+      "scope": "project",
+      "context": "adhub"
+    },
+    {
+      "id": "header_nav_cleanup",
+      "entityName": "ui_ux_system",
+      "content": "Removed deprecated navigation links from HeaderNav component for improved UI clarity. Cleaned up unused routes and simplified navigation structure. Part of broader UI polish effort.",
+      "observedAt": "2026-02-01T00:00:00.000Z",
+      "observer": "Ariel Ganzon",
+      "confidence": 0.9,
+      "scope": "project",
+      "context": "adhub"
+    },
+    {
+      "id": "render_deployment_fixes",
+      "entityName": "deployment_infra",
+      "content": "Fixed Render deployment configuration: port binding, dependency resolution, and build config. Ensures staging and production deploys work reliably. Key fix was server port binding for Render's health check system.",
+      "observedAt": "2026-01-25T00:00:00.000Z",
+      "observer": "ferret9",
+      "confidence": 0.8,
+      "scope": "project",
+      "context": "adhub"
     }
   ]
 }

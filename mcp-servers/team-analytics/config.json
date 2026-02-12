@@ -1,22 +1,49 @@
 {
   "memoryPath": "../../.shared/team-memory.json",
-  "repoPath": "../../../LegalAI_System",
+  "repoPath": "../../../",
+  "github": {
+    "owner": "F9-Global",
+    "repo": "adhub"
+  },
   "engineers": [
     {
       "name": "Brett",
-      "email": "brett@example.com"
+      "email": "56076013+bblackman90@users.noreply.github.com",
+      "email_aliases": ["bb@adhubaudience.com"],
+      "github_username": "Bbadhub",
+      "role": "lead"
     },
     {
-      "name": "Alice Thompson",
-      "email": "alice@example.com"
+      "name": "Angelo Solis",
+      "email": "88774848+angelosolis@users.noreply.github.com",
+      "email_aliases": [
+        "angel@adhubaudience.com",
+        "angelos@f9global.com",
+        "199897706+global-angelo@users.noreply.github.com"
+      ],
+      "github_username": "angelosolis",
+      "role": "engineer"
     },
     {
-      "name": "Bob Martinez",
-      "email": "bob@example.com"
+      "name": "Ariel Ganzon",
+      "email": "199272341+global-ariel@users.noreply.github.com",
+      "email_aliases": ["ariel.g@adhubaudience.com"],
+      "github_username": "global-ariel",
+      "role": "engineer"
     },
     {
-      "name": "Charlie Lee",
-      "email": "charlie@example.com"
+      "name": "f9sam",
+      "email": "sam.patigas@ferret9.com",
+      "email_aliases": [],
+      "github_username": "f9sam",
+      "role": "engineer"
+    },
+    {
+      "name": "ferret9",
+      "email": "ferret9@gmail.com",
+      "email_aliases": ["ferret@MacBook-Pro.local"],
+      "github_username": "ferret9",
+      "role": "devops"
     }
   ],
   "alert_thresholds": {

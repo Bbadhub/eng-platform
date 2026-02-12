@@ -6,6 +6,7 @@
 import { KnowledgeAnalyzer } from '../analyzers/knowledge.js';
 import { CodeQualityAnalyzer } from '../analyzers/code-quality.js';
 import { VelocityAnalyzer } from '../analyzers/velocity.js';
+import { CollaborationAnalyzer } from '../analyzers/collaboration.js';
 
 export class HealthScoreEngine {
   constructor(config) {
@@ -15,31 +16,29 @@ export class HealthScoreEngine {
     this.knowledgeAnalyzer = new KnowledgeAnalyzer(this.memoryPath);
     this.codeQualityAnalyzer = new CodeQualityAnalyzer(this.repoPath);
     this.velocityAnalyzer = new VelocityAnalyzer(this.repoPath);
+    this.collaborationAnalyzer = new CollaborationAnalyzer(config.github, this.repoPath);
 
-    // Score weights
-    this.weights = {
-      code_quality: 0.35,    // 35% weight
-      knowledge_sharing: 0.25, // 25% weight
-      velocity: 0.25,        // 25% weight
-      collaboration: 0.15    // 15% weight (placeholder)
+    // Score weights — use config if provided, otherwise defaults
+    this.weights = config.scoring_weights || {
+      code_quality: 0.35,
+      knowledge_sharing: 0.25,
+      velocity: 0.25,
+      collaboration: 0.15
     };
   }
 
   async calculateEngineerHealth(engineer, timeframe = 30) {
     try {
-      // Run all analyzers in parallel
-      const [knowledge, codeQuality, velocity] = await Promise.all([
-        this.knowledgeAnalyzer.analyze(engineer.name, timeframe),
-        this.codeQualityAnalyzer.analyze(engineer.email, timeframe),
-        this.velocityAnalyzer.analyze(engineer.email, timeframe)
-      ]);
+      // Build email list for git queries (primary + aliases)
+      const allEmails = [engineer.email, ...(engineer.email_aliases || [])];
 
-      // Collaboration score (placeholder - would need PR API data)
-      const collaboration = {
-        score: 75, // Default neutral
-        metrics: {},
-        trending: 'stable'
-      };
+      // Run all analyzers in parallel
+      const [knowledge, codeQuality, velocity, collaboration] = await Promise.all([
+        this.knowledgeAnalyzer.analyze(engineer.name, timeframe),
+        this.aggregateGitAnalysis(this.codeQualityAnalyzer, allEmails, timeframe),
+        this.aggregateGitAnalysis(this.velocityAnalyzer, allEmails, timeframe),
+        this.collaborationAnalyzer.analyze(engineer.github_username, timeframe, engineer.email, allEmails)
+      ]);
 
       // Calculate weighted overall score
       const overall = Math.round(
@@ -168,5 +167,37 @@ export class HealthScoreEngine {
     if (breakdown.velocity >= 85) strengths.push('velocity');
     if (breakdown.collaboration >= 85) strengths.push('collaboration');
     return strengths;
+  }
+
+  /**
+   * Aggregate git-based analyzer results across multiple email aliases.
+   * Engineers often commit from different emails (GitHub noreply, work email, etc).
+   * This combines metrics from all aliases into a single result.
+   */
+  async aggregateGitAnalysis(analyzer, emails, timeframe) {
+    if (emails.length <= 1) {
+      return analyzer.analyze(emails[0], timeframe);
+    }
+
+    // Analyze each email alias
+    const results = await Promise.all(
+      emails.map(email => analyzer.analyze(email, timeframe))
+    );
+
+    // Pick the result with the most commits (most active email)
+    const best = results.reduce((a, b) => {
+      const aCommits = a.metrics?.commits || 0;
+      const bCommits = b.metrics?.commits || 0;
+      return bCommits > aCommits ? b : a;
+    });
+
+    // Sum commit counts across all aliases for accurate totals
+    const totalCommits = results.reduce((sum, r) => sum + (r.metrics?.commits || 0), 0);
+    if (best.metrics && totalCommits > (best.metrics.commits || 0)) {
+      best.metrics.commits = totalCommits;
+      best.metrics.emails_analyzed = emails.length;
+    }
+
+    return best;
   }
 }

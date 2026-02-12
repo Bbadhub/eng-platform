@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-02-09T12:00:00Z",
+  "experiments": [
+    {
+      "experiment_id": "exp-001-strict-linting",
+      "title": "ESLint Strict Configuration Impact",
+      "hypothesis": "Stricter linting rules will improve code quality and reduce bugs",
+      "start_date": "2026-01-15",
+      "planned_end_date": "2026-03-15",
+      "status": "active",
+      "tool_category": "linting",
+      "treatment": "eslint-strict",
+      "control": "eslint-base",
+      "cohort_assignments": {
+        "treatment": ["Alice Thompson", "Bob Martinez"],
+        "control": ["Charlie Lee", "David Kim"]
+      },
+      "success_metrics": [
+        {
+          "metric": "code_quality_score",
+          "target": ">= 85",
+          "baseline": 72
+        },
+        {
+          "metric": "bug_rate",
+          "target": "<= 0.05",
+          "baseline": 0.15
+        },
+        {
+          "metric": "pr_approval_rate",
+          "target": ">= 0.90",
+          "baseline": 0.80
+        }
+      ],
+      "weekly_checkpoints": [
+        {
+          "week": 1,
+          "date": "2026-01-22",
+          "treatment_metrics": {
+            "code_quality_score": 76,
+            "bug_rate": 0.12,
+            "satisfaction_avg": 3.25
+          },
+          "control_metrics": {
+            "code_quality_score": 73,
+            "bug_rate": 0.14,
+            "satisfaction_avg": 4.0
+          },
+          "notes": "Initial learning curve for treatment group"
+        },
+        {
+          "week": 2,
+          "date": "2026-01-29",
+          "treatment_metrics": {
+            "code_quality_score": 82,
+            "bug_rate": 0.09,
+            "satisfaction_avg": 4.0
+          },
+          "control_metrics": {
+            "code_quality_score": 74,
+            "bug_rate": 0.13,
+            "satisfaction_avg": 4.0
+          },
+          "notes": "Treatment group adapting, quality improving"
+        }
+      ],
+      "decision": null,
+      "notes": "Running 8-week experiment to validate strict linting adoption"
+    }
+  ]
+}

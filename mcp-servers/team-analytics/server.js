@@ -24,10 +24,12 @@ const config = JSON.parse(
   await fs.readFile(path.join(__dirname, 'config.json'), 'utf8')
 );
 
-// Initialize engines
+// Initialize engines — pass full config for GitHub API + scoring weights
 const healthEngine = new HealthScoreEngine({
   memoryPath: config.memoryPath,
-  repoPath: config.repoPath
+  repoPath: config.repoPath,
+  github: config.github,
+  scoring_weights: config.scoring_weights
 });
 
 const alertEngine = new AlertEngine();
