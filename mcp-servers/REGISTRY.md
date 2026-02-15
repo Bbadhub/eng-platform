@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-02-14
 **Active in `.mcp.json`:** 13 servers
-**In `.eng-platform/mcp-servers/`:** 14 directories (8 active, 4 inactive, 1 template, 1 docs)
+**In `.eng-platform/mcp-servers/`:** 12 directories (7 active, 4 inactive, 1 template)
 
 ---
 
