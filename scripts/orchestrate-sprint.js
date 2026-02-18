@@ -57,50 +57,41 @@ function saveSprintState(state) {
   fs.writeFileSync(SPRINT_STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-// Parse sprint TOML
+// Parse sprint TOML using proper TOML library
 function parseSprintTOML(filePath) {
+  const toml = require('toml');
   const content = fs.readFileSync(filePath, 'utf8');
+  const data = toml.parse(content);
 
-  // Extract sprint info
-  const sprint = {};
-  const sprintMatch = content.match(/\[sprint\]([\s\S]*?)(?=\[\[|$)/);
-  if (sprintMatch) {
-    const sprintBlock = sprintMatch[1];
-    sprint.id = sprintBlock.match(/id\s*=\s*(\d+)/)?.[1];
-    sprint.version = sprintBlock.match(/version\s*=\s*"([^"]+)"/)?.[1];
-    sprint.start_date = sprintBlock.match(/start_date\s*=\s*"([^"]+)"/)?.[1];
-    sprint.end_date = sprintBlock.match(/end_date\s*=\s*"([^"]+)"/)?.[1];
+  // Metadata fallback chain: metadata (canonical) → sprint (old) → meta (old)
+  const meta = data.metadata || data.sprint || data.meta || {};
+  const sprint = {
+    id: meta.id || meta.sprint_number,
+    version: meta.version,
+    start_date: meta.created || meta.start_date,
+    end_date: meta.target_date || meta.end_date,
+    github_issues: meta.github_issues || []
+  };
 
-    const issuesMatch = sprintBlock.match(/github_issues\s*=\s*\[([^\]]+)\]/);
-    if (issuesMatch) {
-      sprint.github_issues = issuesMatch[1].split(',').map(n => parseInt(n.trim()));
+  // Extract tasks from [tasks.*] sections
+  const tasks = [];
+  if (data.tasks) {
+    for (const [taskId, task] of Object.entries(data.tasks)) {
+      tasks.push({
+        id: taskId,
+        title: task.name || task.title || 'Unnamed Task',
+        assignee: task.assignee || task.assigned_engineer || null,
+        priority: task.priority || 'medium',
+        labels: task.labels || [],
+        depends_on: task.depends_on || task.dependencies || [],
+        status: task.status || 'planned',
+        phase: task.phase || 'development',
+        agent: task.agent || task.agent_group || 'general-purpose',
+        type: task.type || '',
+        description: task.description || ''
+      });
     }
   }
-
-  // Extract tasks
-  const tasks = [];
-  const taskBlocks = content.split(/\[\[tasks?\]\]/g).slice(1);
-
-  taskBlocks.forEach(block => {
-    const task = {};
-    task.title = block.match(/title\s*=\s*"([^"]+)"/)?.[1];
-    task.assignee = block.match(/assignee\s*=\s*"([^"]+)"/)?.[1];
-    task.priority = block.match(/priority\s*=\s*"([^"]+)"/)?.[1];
-
-    const labelsMatch = block.match(/labels\s*=\s*\[([^\]]+)\]/);
-    if (labelsMatch) {
-      task.labels = labelsMatch[1].split(',').map(l => l.trim().replace(/"/g, ''));
-    }
-
-    const dependsMatch = block.match(/depends_on\s*=\s*\[([^\]]+)\]/);
-    if (dependsMatch) {
-      task.depends_on = dependsMatch[1].split(',').map(d => d.trim().replace(/"/g, ''));
-    }
-
-    if (task.title) {
-      tasks.push(task);
-    }
-  });
 
   return { sprint, tasks };
 }

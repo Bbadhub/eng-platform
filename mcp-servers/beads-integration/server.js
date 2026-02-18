@@ -18,6 +18,7 @@ import {
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import toml from 'toml';
 
 const server = new Server(
   {
@@ -205,20 +206,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'beads_decompose_sprint': {
         // Read sprint TOML
         const sprintContent = fs.readFileSync(args.sprint_file, 'utf8');
-
-        // Parse TOML (simple parser for demo - use proper TOML parser in production)
         const tasks = extractTasksFromSprint(sprintContent);
+
+        // Dedup guard: check if subtasks already exist for this sprint
+        const sprintLabel = `sprint-${args.parent_issue}`;
+        try {
+          const existingOutput = runBeadsCommand(`list --label ${sprintLabel}`);
+          if (existingOutput && existingOutput.includes('bd-')) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  parent_task: null,
+                  subtasks: [],
+                  total: 0,
+                  message: `Sprint ${args.parent_issue} already decomposed. Found existing beads tasks with label '${sprintLabel}'. Skipping to prevent duplicates.`,
+                  already_decomposed: true
+                }, null, 2)
+              }]
+            };
+          }
+        } catch (e) {
+          // No existing tasks found — proceed with decomposition
+        }
 
         // Create parent task
         const parentTitle = `Sprint: ${args.parent_issue}`;
-        const parentCmd = `new "${parentTitle}" --label sprint`;
+        const parentCmd = `new "${parentTitle}" --label sprint --label ${sprintLabel}`;
         const parentOutput = runBeadsCommand(parentCmd);
         const parentId = extractTaskId(parentOutput);
 
         // Create subtasks with dependencies
         const createdTasks = [];
         for (const task of tasks) {
-          let cmd = `new "${task.title}" --label subtask`;
+          let cmd = `new "${task.title}" --label subtask --label ${sprintLabel}`;
           if (task.depends_on && task.depends_on.length > 0) {
             cmd += ` --depends ${task.depends_on.join(',')}`;
           }
@@ -228,9 +249,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
           const output = runBeadsCommand(cmd);
           createdTasks.push({
-            title: task.title,
             id: extractTaskId(output),
-            depends_on: task.depends_on || []
+            title: task.title,
+            task_id: task.id,
+            depends_on: task.depends_on || [],
+            assignee: task.assignee
           });
         }
 
@@ -406,26 +429,25 @@ function extractTaskId(output) {
 }
 
 function extractTasksFromSprint(sprintContent) {
-  // Simple TOML parser for tasks
-  // In production, use proper TOML parser like @iarna/toml
-  const tasks = [];
-  const taskBlocks = sprintContent.split(/\[\[tasks?\]\]/g).slice(1);
+  const data = toml.parse(sprintContent);
+  if (!data.tasks) return [];
 
-  taskBlocks.forEach(block => {
-    const titleMatch = block.match(/title\s*=\s*"([^"]+)"/);
-    const dependsMatch = block.match(/depends_on\s*=\s*\[([^\]]+)\]/);
-    const assigneeMatch = block.match(/assignee\s*=\s*"([^"]+)"/);
-
-    if (titleMatch) {
-      tasks.push({
-        title: titleMatch[1],
-        depends_on: dependsMatch ? dependsMatch[1].split(',').map(s => s.trim().replace(/"/g, '')) : [],
-        assignee: assigneeMatch ? assigneeMatch[1] : null
-      });
-    }
-  });
-
-  return tasks;
+  return Object.entries(data.tasks).map(([id, task]) => ({
+    id,
+    title: task.name || task.title || 'Unnamed Task',
+    description: task.description || '',
+    assignee: task.assignee || task.assigned_engineer || null,
+    agent: task.agent || task.agent_group || 'general-purpose',
+    depends_on: task.depends_on || task.dependencies || [],
+    priority: task.priority || 'medium',
+    status: task.status || 'planned',
+    phase: task.phase || 'development',
+    type: task.type || '',
+    decision_ids: task.decision_ids || [],
+    test_requirements: task.test_requirements || '',
+    validation_criteria: task.validation_criteria || '',
+    estimated_time: task.estimated_time || 'Not specified'
+  }));
 }
 
 function buildDependencyGraph(tasks) {
